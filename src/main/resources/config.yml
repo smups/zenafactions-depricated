@@ -1,19 +1,27 @@
-faction creation cost: 3000.0
-influence per player: 50.0
-default faction name: Capitol Faction
-Claim Influence Cost: 1.0
-deathCost: 3.0
-Modify mob xp drops: true
-#Warstuff
-warDuration (h): 24
-warCost: 10.0
-#WarpStuff
+#General Settings
+Version check interval: 3 #(hours) how often should ZenaFactions check for a new version?
+Performance logging: true #should the plugin log performance metrics?
+default faction name: Neutrals
+bindBeaconToFaction: true #do beacons only effect players from the faction to which the territory it was placed in belongs?
+Modify mob xp drops: true #use rebalanced mob xp drops?
+influence per player: 50.0 #how much infuence does a faction gain from a new player?
+Claim Influence Cost: 1.0 #how much influence does claiming a chunk cost?
+
+#Economy Settings
+Currency Symbol: Ƒ #currency symbol used by plugin. (in case you're wondering, the default is the symbol for the old Dutch Guldier :) )
+faction creation cost: 3000.0 #how much money does creating a faction cost?
+deathCost: 3.0 #how much money (per level) does dying cost?
+Banner Price: 10 #how much money does a faction banner cost?
+
+#War Settings
+warCost: 10.0 #how much influence does starting a war cost?
+warDuration (h): 24 #how long do wars last? (in hours)
+
+#Warp Settings
 warpCost: 0.01 #Cost per block for a warp
 warpCreationCost: 100 #Cost to create a warp
 warpScale: 1.2 #Scale factor: cost(#warps)=warpCreationCost*(#warps)^warpScale. Set to 0 to disable scaling
-bindBeaconToFaction: true #do beacons only effect the player 
-#loans
-Currency Symbol: Ƒ #currency symbol used by plugin.
-default interest: 0.01 #default is 1%/hour
-default loan length: 100 #default is 100 hours
-Banner Price: 10
+
+#Loan Settings
+default interest: 0.01 #interest per hour (default is 0.01 = 1% / hour)
+default loan length: 100 #length of a loan (default is 100h = 4d 4h)

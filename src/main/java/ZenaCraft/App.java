@@ -2,6 +2,8 @@ package ZenaCraft;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,7 +27,11 @@ import net.milkbowl.vault.permission.Permission;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 
@@ -44,28 +50,43 @@ public final class App extends JavaPlugin
 
     public static FactionIOstuff factionIOstuff;
     public static WarThread warThread;
+    public static PerfCheckThread perfThread;
 
     private static Economy econ = null;
     private static Permission perms = null;
     private static Chat chat = null;
 
+    public static boolean EU = false;
+    public static boolean logging = false;
+
+    private Timer t;
+
     String default_fname = getConfig().getString("default faction name");
+    String currentVersionTitle;
+    double currentVersion;
 
     @Override
     public void onEnable() {
         // say something to console
         getLogger().info(zenfac + "Loading ZenaFactions...");
 
-        String currentVersionTitle = getDescription().getVersion();
-        double currentVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
+        currentVersionTitle = getDescription().getVersion().trim();
+        currentVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
 
         common = new Common();
+
+        //check if we are in the EU and have to display a GDPR message
+        if(ZonedDateTime.now().getZone().equals(ZoneId.of("Europe/Amsterdam"))) EU = true;
 
         // load config
         saveDefaultConfig();
 
         // intiate db
         factionIOstuff = new FactionIOstuff(player_db, faction_db, zenfac, FQChunk_db);
+
+        //start performance loggin
+        if(getConfig().getBoolean("Performance logging"))
+            perfThread = new PerfCheckThread();
 
         // Hook into Vault
         if (!setupEconomy()) {
@@ -140,7 +161,19 @@ public final class App extends JavaPlugin
         warThread = new WarThread(war_db);
 
         //and we do a little version check
-        updateCheck(currentVersion);
+        String newVersionTitle = getNewestVersion();
+        double newVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
+
+        if (newVersion > currentVersion){
+            log.warning(App.zenfac + "New version: v" + newVersionTitle + " found!" + 
+                " Please update your ZenaFactions Install!");
+        }
+        else log.info(App.zenfac + "ZenaFactions is uptodate!");
+
+        //and setup the version checker
+        long hourint = getConfig().getLong("Version check interval");
+        t = new Timer();
+        t.schedule(new TikTok(), hourint*1000*3600);
     }
 
     @Override
@@ -151,7 +184,44 @@ public final class App extends JavaPlugin
         // save wardb
         warThread.saveDB();
 
+        //stop updatechecker
+        t.cancel();
+
+        //stop perflogger
+        perfThread.disable();
+        
+        //byeeee
         getLogger().info(zenfac + "Byeee");
+    }
+
+    private class TikTok extends TimerTask{
+        @Override
+        public void run() {
+            log.info(App.zenfac + "Looking for a new version...");
+
+            String newVersionTitle = getNewestVersion();
+            if (newVersionTitle == null) return;
+
+            double newVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
+
+            String msg;
+
+            if (newVersion > currentVersion){
+               msg = "New version: v" + newVersionTitle + " found!" + 
+                " Please update your ZenaFactions Install!";
+                log.warning(App.zenfac + msg);
+            }
+            else{
+                msg = ChatColor.DARK_GRAY + "ZenaFactions is uptodate!";
+                log.info(App.zenfac + msg);
+            }
+
+            for(OfflinePlayer op : Bukkit.getOperators()){
+                if (!op.isOnline()) continue;
+                Player p = (Player) op.getPlayer();
+                p.sendMessage(App.zenfac + ChatColor.DARK_GRAY + msg);
+            }
+        }
     }
 
     private boolean setupEconomy() {
@@ -213,28 +283,27 @@ public final class App extends JavaPlugin
         return true;
     }
 
-    private double updateCheck(double currentVersion){
+    private String getNewestVersion(){
         try{
             URL url = new URL("https://api.curseforge.com/servermods/files?projectids=441588");
-            URLConnection conn = url.openConnection();
-            conn.setReadTimeout(5000);
-            conn.addRequestProperty("User-Agent", "ZenaFactions Update Checker");
-            conn.setDoOutput(true);
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             final String response = reader.readLine();
+
             final JSONArray array = (JSONArray) JSONValue.parse(response);
 
             if (array.size() == 0){
-                log.warning("Could not find update file!");;
+                log.warning("Updatefile is empty!");;
+                return null;
             }
 
             // Pull the last version from the JSON
-            String newVersionTitle = ((String) ((JSONObject) array.get(array.size() - 1)).get("name")).replace("ZenaFactions", "").trim();
-            return Double.valueOf(newVersionTitle.replaceAll("\\.", "").trim());
+            String newVersionTitle = ((String) ((JSONObject) array.get(array.size() - 1)).get("fileName")).split("-")[1].trim();
+            return newVersionTitle;
         }
         catch (Exception e) {
-            log.info("There was an issue attempting to check for the latest version.");
+            log.info(e.getMessage());
         }
-        return currentVersion;
+        return null;
     }
 }

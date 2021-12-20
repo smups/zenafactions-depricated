@@ -246,3 +246,16 @@ features:
 bugfixes:
 - fixed formatting issue with /changefactionname command
 - fixed formatting issue with /listwarps command
+
+0.1.14.1
+features:
+- cleaned up config file
+- finished update checker
+- added a performance logging feature
+- added an Automatic GDPR message for servers running in the EU
+- restricted /claimchunk and /toggleautoclaiming to a radius of max 10 chunks
+
+0.1.14.2
+bugfixes:
+- fixed bug with loan timer crashing if loans expire while player offline
+- improved compatibility (known issues with TheNewEconomy): jar now includes shaded dependencies, resolving duplicate dependency conflicts

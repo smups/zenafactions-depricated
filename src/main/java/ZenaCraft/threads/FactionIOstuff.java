@@ -325,6 +325,11 @@ public class FactionIOstuff {
             if (radius_ != null) radius = radius_;
             else radius = 1;
 
+            if(radius > 12){
+                if(player != null) player.sendMessage(zenfac + ChatColor.RED + "Maximum claim radius is 100!");
+                return;
+            }
+
             this.start();
 
             if (waitThread != null){

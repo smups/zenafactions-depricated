@@ -31,6 +31,8 @@ public class PlayerJoin implements Listener{
             App.factionIOstuff.addPlayerToFaction(defaultFaction, player, rank);
 
             event.getPlayer().sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the international faction!");
+
+            if(App.EU && App.logging) App.getCommon().EUgdpr(player);
         }
         else{
             //Now for the returning player
@@ -38,7 +40,12 @@ public class PlayerJoin implements Listener{
                     
             event.setJoinMessage(App.zenfac + ChatColor.WHITE + "(" + faction.getPrefix() + ChatColor.WHITE + ") " +
                 "Welcome back " + ChatColor.BOLD + player.getDisplayName());
+
         }
+
+        //notify admins of GDPR
+        if(player.isOp())
+            if(App.EU && App.logging) App.getCommon().EUgdpr(player);
 
         //Here comes the Scoreboard stuff
         App.factionIOstuff.reloadScoreBoard(player);

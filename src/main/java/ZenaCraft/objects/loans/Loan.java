@@ -86,7 +86,7 @@ public class Loan extends AvaliableLoan{
     }
 
     public void payLoan(){
-        OfflinePlayer op = Bukkit.getPlayer(player);
+        OfflinePlayer op = Bukkit.getOfflinePlayer(player);
         Faction f = App.factionIOstuff.getPlayerFaction(op);
         Economy econ = App.getEconomy();
 

@@ -6,7 +6,7 @@
 
   <groupId>ZenaCraft</groupId>
   <artifactId>ZenaFactions</artifactId>
-  <version>0.1.13.3-SNAPSHOT</version>
+  <version>0.1.14.1-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
@@ -89,12 +89,49 @@
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-math3</artifactId>
     <version>3.6.1</version>
+    <scope>provided</scope>
+  </dependency>
+
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.12.0</version>
   </dependency>
 
   </dependencies>
 
   <build>
     <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>com.fasterxml.jackson.core</include>
+                </includes>
+              </artifactSet>
+              <relocations>
+                <relocation>
+                  <pattern>com.fasterxml.jackson</pattern>
+                  <shadedPattern>com.fasterxml.zenafactions</shadedPattern>
+                </relocation>
+              </relocations>
+              <minimizeJar>true</minimizeJar>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
 
     <resources>
       <resource>

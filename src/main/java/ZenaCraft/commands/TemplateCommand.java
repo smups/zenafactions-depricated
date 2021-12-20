@@ -32,8 +32,16 @@ public class TemplateCommand implements CommandExecutor{
         if (!checkArgSize(player, args)) return true;
 
         this.args = args;
+        
+        long start = System.nanoTime();
+        boolean result = run();
+        long stop = System.nanoTime();
 
-        return run();
+        if(!App.logging) return result;
+
+        App.perfThread.logcommand(this.getClass().getName(), (stop - start)/1000);
+
+        return result;
     }
 
     protected boolean getSender(CommandSender sender){

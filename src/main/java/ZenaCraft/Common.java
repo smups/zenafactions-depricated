@@ -17,6 +17,17 @@ public class Common {
     private Plugin plugin = App.getPlugin(App.class);
     private String moneyChar = plugin.getConfig().getString("Currency Symbol");
 
+    public static String gdpr = "This server is" +
+    " running " + ChatColor.BOLD + "ZenaFactions" + ChatColor.RESET + " " + ChatColor.RED +
+    " from within the European Union. Your server admin has chosen to log performance " +
+    "data to aid in the development of this plugin. As per EU GDPR regulations, he/she must " +
+    "ask for explicit consent from users to share this data with me. " + ChatColor.DARK_RED + "" +
+    ChatColor.BOLD + "By playing on this server you give your explicit consent for performance metrics to be shared with " +
+    "a third party, I.E. the developers of ZenaFactions. You also confirm that you are at least 16" +
+    " years of age or have explicit consent form a parent or supervisor. " + ChatColor.RESET + "" +
+    ChatColor.RED + " If you are a server operator and did not expect this message, please take a look" +
+    " at the ZenaFactions config files. Thank you!";
+
 	// Messages
     public boolean invalidSyntax(Player player) {
         player.sendMessage(App.zenfac + ChatColor.RED + "Invalid Syntax! Use /help zenafactions for help");
@@ -66,6 +77,12 @@ public class Common {
     public boolean noMember(Player player){
         player.sendMessage(App.zenfac + ChatColor.RED + "That player isn't in your faction!");
         return true;
+    }
+    public void EUgdpr(Player player){
+        String msg = App.zenfac + ChatColor.RED + "Hi there " + ChatColor.BOLD + player.getName() +
+        ChatColor.RESET + " " + ChatColor.RED + "and welcome to the Server! " + gdpr;
+
+        player.sendMessage(msg);
     }
 
     // Formats
