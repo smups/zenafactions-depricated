@@ -30,3 +30,14 @@ ZenaFactions Plugin Changelog
 -sidebar is still _buggy_
 -added factionID (int) field to faction datastructure
 -added factionID metadata field to player metadata
+
+0.1.5
+-added FactionQChunk datatype
+-added new data system for chunk data
+-added claimChunk command
+-added listFQChunks command
+-added title popUp when moving into new terretory
+-fixed a whole load of bugs
+
+0.1.6
+-added dynmap support for faction terretory

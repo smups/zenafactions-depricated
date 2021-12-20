@@ -1,9 +1,11 @@
 package ZenaCraft.events;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,6 +20,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.FactionQChunk;
 
 public class PlayerJoin implements Listener{
     //This file checks on join if the player has metadata corresponding to membership of a new faction
@@ -62,8 +65,6 @@ public class PlayerJoin implements Listener{
 
         if (board.getObjective(DisplaySlot.SIDEBAR) == null){
             objective = board.registerNewObjective("test", "dummy", ChatColor.BOLD + "Faction Influence");
-            Score score = objective.getScore(ChatColor.RED + "test");
-            score.setScore(1200);
         }
         else{
             objective = board.getObjective(DisplaySlot.SIDEBAR);        
@@ -77,5 +78,41 @@ public class PlayerJoin implements Listener{
         }
 
         player.setScoreboard(board);
+
+        //here comes the chunk stuff
+        loadFQChunks(player);
+    }
+
+    private void loadFQChunks(Player player){
+        Location location = player.getLocation();
+        double[] borderLocs = new double[] {0, 1600, -1600};
+
+        for (double offsetX : borderLocs){
+            for (double offsetZ : borderLocs){
+
+                double[] playerLoc = new double[2];
+                playerLoc[0] = location.getX() + offsetX;
+                playerLoc[1] = location.getZ() + offsetZ;
+        
+                int[] chunkLoc = new int[2];
+                chunkLoc[0] = location.getChunk().getX() + (int) offsetX/16;
+                chunkLoc[1] = location.getChunk().getZ() + (int) offsetZ/16;
+        
+                String fQchunkName = "";
+        
+                int fQx = chunkLoc[0]/100;
+                int fQz = chunkLoc[1]/100;
+        
+                fQchunkName += ("X" + String.valueOf(fQx));
+                fQchunkName += ("Z" + String.valueOf(fQz));
+        
+                if(!App.loadedFQChunks.containsKey(fQchunkName)){
+                    App.loadedFQChunks.put(fQchunkName, new FactionQChunk(fQchunkName, player, playerLoc));
+                }
+                else{
+                    App.loadedFQChunks.get(fQchunkName).addOnlinePlayer(player);
+                }
+            }
+        }
     }
 }

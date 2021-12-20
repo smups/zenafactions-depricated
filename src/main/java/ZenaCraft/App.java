@@ -6,14 +6,19 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import ZenaCraft.commands.claimChunk;
 import ZenaCraft.commands.createFaction;
 import ZenaCraft.commands.factionBalance;
 import ZenaCraft.commands.factionInfluence;
 import ZenaCraft.commands.listFactions;
+import ZenaCraft.commands.listLoadedFQChunks;
 import ZenaCraft.commands.saveDB;
 import ZenaCraft.commands.setPrefix;
 import ZenaCraft.events.PlayerJoin;
+import ZenaCraft.events.PlayerLeave;
+import ZenaCraft.events.PlayerMove;
 import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.FactionQChunk;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -38,8 +43,10 @@ public final class App extends JavaPlugin
     public static String zenfac = ChatColor.AQUA + "[ZenaFactions] ";
     public static String player_db = "plugins/ZenaFactions/dat/players.ser";
     public static String faction_db = "plugins/ZenaFactions/dat/factions.ser";
+    public static String FQChunk_db = "plugins/ZenaFactions/dat/";
     public static HashMap<String, Faction> factionHashMap = new HashMap<String, Faction>();
     public static HashMap<UUID, String> playerHashMap = new HashMap<UUID, String>();
+    public static HashMap<String, FactionQChunk> loadedFQChunks= new HashMap<String, FactionQChunk>();
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -68,6 +75,8 @@ public final class App extends JavaPlugin
 
         //Events
         pm.registerEvents(new PlayerJoin(), this);
+        pm.registerEvents(new PlayerLeave(), this);
+        pm.registerEvents(new PlayerMove(), this);
 
         //Commands
         getCommand("listFactions").setExecutor(new listFactions());
@@ -76,6 +85,8 @@ public final class App extends JavaPlugin
         getCommand("factionBalance").setExecutor(new factionBalance());
         getCommand("factionInfluence").setExecutor(new factionInfluence());
         getCommand("setPrefix").setExecutor(new setPrefix());
+        getCommand("listLoadedFQChunks").setExecutor(new listLoadedFQChunks());
+        getCommand("claimChunk").setExecutor(new claimChunk());
     }
 
     @Override
@@ -89,11 +100,15 @@ public final class App extends JavaPlugin
     private void initDB(){
         getLogger().info("Starting database init...");
 
-        File dat = new File("plugins/ZenaFactions/dat");
+        String[] folders = new String[] {"plugins/ZenaFactions/dat", FQChunk_db + "Q1", FQChunk_db + "Q2", FQChunk_db + "Q3", FQChunk_db + "Q4"};
 
-        if(!dat.exists()){
-            dat.mkdirs();
-            getLogger().info(zenfac + "No dat folder found. Making one...");
+        for (String folder_name : folders){
+            File dat = new File(folder_name);
+
+            if(!dat.exists()){
+                dat.mkdirs();
+                getLogger().info(zenfac + "No "+ folder_name +" folder found. Making one...");
+            }
         }
 
         File players = new File(player_db);

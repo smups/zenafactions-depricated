@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.4
+version: 0.1.5
 api-version: 1.16
 depend: ["Vault"]
 commands:
@@ -22,3 +22,9 @@ commands:
   setPrefix:
     description: changes prefix and color. Allowed colors are red, orange, purple, blue, and green
     usage: /<command> [prefix] [color]
+  listLoadedFQChunks:
+    description: lists loaded FQC's
+    usage: /<command>
+  claimChunk:
+    description: claims chunk for your faction
+    usage: /<command>
