@@ -1,0 +1,7 @@
+ZenaFactions Plugin Changelog
+
+0.1.1
+-Faction is now stored in player metadata
+-Added seralized hasmap of player UUID (key) and Faction
+-Added PlayerJoin listener that initiates and updates metadata
+-Hashmap lookups in PlayerJoin are now multi-threaded
