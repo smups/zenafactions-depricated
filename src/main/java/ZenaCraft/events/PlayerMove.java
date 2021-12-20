@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +27,10 @@ public class PlayerMove implements Listener{
 
         //Check of de player naar een nieuwe chunk is gelopen
         if (oldChunk.getX() != newChunk.getX() || oldChunk.getZ() != newChunk.getZ()){
+
+            //stop als player niet in overworld is
+            if (!player.getWorld().getEnvironment().equals(World.Environment.NORMAL)) return;
+
             String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
             String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);
 

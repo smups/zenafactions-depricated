@@ -15,7 +15,6 @@ public class listFactions implements CommandExecutor{
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
-        Player player = (Player) sender;
         String response = App.zenfac + "Current factions: ";
 
         for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
@@ -27,6 +26,7 @@ public class listFactions implements CommandExecutor{
             Bukkit.getLogger().info(response);
             return true;
         }
+        Player player = (Player) sender;
         player.sendMessage(response);
         return true;
     }

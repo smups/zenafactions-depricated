@@ -16,7 +16,11 @@ public class setPrefix implements CommandExecutor{
         if (!(sender instanceof Player)){
             return true;
         }
+
         Player player = (Player) sender;
+
+        if (args.length != 2) return App.invalidSyntax(player);
+
         String name = args[0];
         String color = (String) args[1];
 

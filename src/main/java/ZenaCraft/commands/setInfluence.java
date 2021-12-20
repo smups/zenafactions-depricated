@@ -19,12 +19,22 @@ public class setInfluence implements CommandExecutor{
             return true;
         }
         Player player = (Player) sender;
-        if (!player.isOp()) return true;
+
+        if (!player.isOp()){
+            player.sendMessage(App.zenfac + ChatColor.RED + "Admin command only");
+        }
+        
+        if (args.length != 2) return App.invalidSyntax(player);
 
         for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
             Faction faction = (Faction) mEntry.getValue();
             if (faction.getName().equals(args[0])){
-                faction.setInfluence(Double.parseDouble(args[1]));
+                try{
+                    faction.setInfluence(Double.parseDouble(args[1]));
+                }
+                catch (Exception e){
+                    return App.invalidSyntax(player);
+                }
                 App.factionIOstuff.reloadScoreBoard(null);
                 return true;
             }

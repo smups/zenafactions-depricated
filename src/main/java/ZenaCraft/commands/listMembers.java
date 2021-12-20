@@ -27,7 +27,7 @@ public class listMembers implements CommandExecutor{
         
         for (Map.Entry mapElement : members.entrySet()){
             UUID uuid = (UUID) mapElement.getKey();
-            response += (Bukkit.getOfflinePlayer(uuid).getName() + " ");
+            response += (Bukkit.getOfflinePlayer(uuid).getName() + ", ");
         }
         player.sendMessage(response);
         return true;

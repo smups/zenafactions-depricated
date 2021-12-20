@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -120,6 +121,7 @@ public class FactionIOstuff {
     }
     public void removeFaction(Faction faction){
         factionHashMap.remove(faction.getID());
+        saveDB();
     }
     public void addPlayerToFaction(Faction faction, Player player, int rank){
         faction.addMember(player.getUniqueId(), rank);
@@ -130,7 +132,9 @@ public class FactionIOstuff {
         //Messages
         for (Map.Entry mEntry : faction.getMembers().entrySet()){
             try{
-                Player fmember = Bukkit.getPlayer((UUID) mEntry.getKey());
+                OfflinePlayer ofmember = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
+                if (!ofmember.isOnline()) continue;
+                Player fmember = (Player) ofmember;
                 fmember.playSound(fmember.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
                 fmember.sendMessage(zenfac + ChatColor.GREEN + player.getName() + " joined your faction!");
             }
@@ -146,11 +150,14 @@ public class FactionIOstuff {
     public void removePlayerFromFaction(Faction faction, Player player){
         faction.removeMember(player.getUniqueId());
         faction.setInfluence(faction.getInfluence() - player_influence);
+        if (faction.getMembers().size() == 0) removeFaction(faction);
         playerHashMap.remove(player.getUniqueId());
 
         //Messages
         for (Map.Entry mEntry : faction.getMembers().entrySet()){
-            Player fmember = Bukkit.getPlayer((UUID) mEntry.getKey());
+            OfflinePlayer ofmember = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
+            if (!ofmember.isOnline()) continue;
+            Player fmember = (Player) ofmember;
             fmember.playSound(fmember.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
             fmember.sendMessage(zenfac + ChatColor.RED + player.getName() + " left your faction!");
         }
@@ -158,6 +165,7 @@ public class FactionIOstuff {
     public void changePlayerFaction(Faction newFaction, Player player, int rank){
         removePlayerFromFaction(getPlayerFaction(player), player);
         addPlayerToFaction(newFaction, player, rank);
+        reloadScoreBoard(null);
     }
 
     // +++ Threading enzo +++
@@ -341,12 +349,9 @@ public class FactionIOstuff {
         Scoreboard board = manager.getMainScoreboard();
         Objective objective;
 
-        if (board.getObjective(DisplaySlot.SIDEBAR) == null){
-            objective = board.registerNewObjective("test", "dummy", ChatColor.BOLD + "Faction Influence");
-        }
-        else{
-            objective = board.getObjective(DisplaySlot.SIDEBAR); 
-        }
+        if (board.getObjective(DisplaySlot.SIDEBAR) != null) board.getObjective(DisplaySlot.SIDEBAR).unregister();
+        
+        objective = board.registerNewObjective("test", "dummy", ChatColor.BOLD + "Faction Influence");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){

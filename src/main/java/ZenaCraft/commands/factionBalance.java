@@ -16,7 +16,10 @@ public class factionBalance implements CommandExecutor {
         if (!(sender instanceof Player)){
             return true;
         }
+
         Player player = (Player) sender;
+
+        if (args.length != 0) return App.invalidSyntax(player);
 
         int factionID = player.getMetadata("factionID").get(0).asInt();
         if (!(App.factionIOstuff.getFactionList().containsKey(factionID))){

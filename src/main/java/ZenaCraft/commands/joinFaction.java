@@ -19,13 +19,21 @@ public class joinFaction implements CommandExecutor{
         }
         Player player = (Player) sender;
 
-        if (args.length != 1) return true;
+        //check syntax
+        if (args.length != 1) return App.invalidSyntax(player);
+
+        //check if they're trying to boop you by joining their own faction
+        if (App.factionIOstuff.getFaction(player.getMetadata("factionID").get(0).asInt()).getName().equals(args[0])){
+            player.sendMessage(App.zenfac + ChatColor.RED + "Can't join a faction you're already a member of!");
+            return true;
+        }
 
         for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
             Faction faction = (Faction) mEntry.getValue();
+
             if (faction.getName().equals(args[0])){
                 App.factionIOstuff.changePlayerFaction(faction, player, 2);
-                player.sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the faction: " + faction.getPrefix());
+                player.sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the faction: " + ChatColor.BOLD + faction.getPrefix());
                 return true;
             }
         }

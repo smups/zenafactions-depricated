@@ -20,7 +20,7 @@ public class saveDB implements CommandExecutor{
             }
         }
         sender.sendMessage(App.zenfac + "Saving databases");
-        App.factionIOstuff.saveDB();
+        App.factionIOstuff.saveDB();;
         return true;
     }
 }

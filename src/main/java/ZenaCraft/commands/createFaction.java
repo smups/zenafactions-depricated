@@ -29,12 +29,15 @@ public class createFaction implements CommandExecutor{
             return true;
         }
         Player player = (Player) sender;
+
+        if (args.length != 1) return App.invalidSyntax(player);
+
         String name = args[0];
 
         for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
             Faction f = (Faction) mEntry.getValue();
             if (f.getName() == name){
-                player.sendMessage(App.zenfac + ChatColor.DARK_RED + "Faction Already exists!");
+                player.sendMessage(App.zenfac + ChatColor.RED + "Faction Already exists!");
                 return true;
             }
         }
@@ -49,6 +52,8 @@ public class createFaction implements CommandExecutor{
         int newID = (int) App.factionIOstuff.getFactionList().size();
 
         Faction newFaction = new Faction(name, defaultRanks, faction_cost, new HashMap<UUID, Integer>(), prefix, newID, 0xFFFFFF);
+
+        App.factionIOstuff.addFaction(newFaction);
 
         App.factionIOstuff.changePlayerFaction(newFaction, player, 0);
 

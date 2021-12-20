@@ -10,6 +10,7 @@ import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.War;
 
 public class PlayerJoin implements Listener{
     //This file checks on join if the player has metadata corresponding to membership of a new faction
@@ -65,5 +66,8 @@ public class PlayerJoin implements Listener{
         if (!player.hasMetadata("autoClaimingRadius")){
             player.setMetadata("autoClaimingRadius", new FixedMetadataValue(plugin, 0));
         }
+
+        //WarStuff
+        for (War war : App.warThread.getWars()) war.setPlayerBossbar(player);
     }
 }

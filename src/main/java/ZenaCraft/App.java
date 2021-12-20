@@ -2,6 +2,7 @@ package ZenaCraft;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,8 +28,10 @@ public final class App extends JavaPlugin
     public static String player_db = "plugins/ZenaFactions/dat/players.ser";
     public static String faction_db = "plugins/ZenaFactions/dat/factions.ser";
     public static String FQChunk_db = "plugins/ZenaFactions/dat/";
+    public static String war_db = "plugins/ZenaFactions/dat/wars.ser";
 
     public static FactionIOstuff factionIOstuff;
+    public static WarThread warThread;
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -90,6 +93,12 @@ public final class App extends JavaPlugin
         getCommand("listMembers").setExecutor(new listMembers());
         getCommand("setInfluence").setExecutor(new setInfluence());
         getCommand("joinFaction").setExecutor(new joinFaction());
+        getCommand("promote").setExecutor(new promote());
+        getCommand("demote").setExecutor(new demote());
+        getCommand("changeRankNames").setExecutor(new setRankNames());
+        getCommand("declarewar").setExecutor(new declarewar());
+        getCommand("warscore").setExecutor(new warscore());
+        getCommand("listwars").setExecutor(new listwars());
 
         //Hook into Dynmap
         if (!setupMap()){
@@ -97,12 +106,18 @@ public final class App extends JavaPlugin
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+
+        //all the way at the end we setup the war database
+        warThread = new WarThread(war_db);
     }
 
     @Override
     public void onDisable(){
         //save factiondb
         factionIOstuff.saveDB();
+
+        //save wardb
+        warThread.saveDB();
         
         getLogger().info(zenfac + "Byeee");
     }
@@ -180,5 +195,11 @@ public final class App extends JavaPlugin
 
     public static MarkerSet getMarkerSet(){
         return markerSet;
+    }
+
+    //public functions
+    public static boolean invalidSyntax(Player player){
+        player.sendMessage(zenfac + ChatColor.RED + "Invalid Syntax! Use /help zenafactions for help");
+        return true;
     }
 }

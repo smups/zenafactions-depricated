@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.8.1
+version: 0.1.9.1
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -40,3 +40,21 @@ commands:
   joinFaction:
     description: leave your current faction and join a new one in the lowest rank
     usage: /<command> [faction]
+  promote:
+    description: promotes the specified player one rank
+    usage: /<command> [player to be promoted]
+  demote:
+    description: demotes the specified player one rank
+    usage: /<command> [player to be demoted]
+  changeRankNames: 
+    description: changes the names of the ranks in your faction
+    usage: </command> [Highest rank] [Middle rank] [lowest rank]
+  declarewar:
+    description: declares war on the target faction. Current location will automatically be added to the warzone
+    usage: </command> [target faction]
+  warscore:
+    description: gets warscore of current war
+    usage: </command>
+  listwars:
+    description: lists current wars
+    usage: /<command>

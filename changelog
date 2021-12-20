@@ -71,3 +71,31 @@ ZenaFactions Plugin Changelog
 -fixed some minor bugs with /listMembers
 -changed currency symbol to Ƒ
 -now also checking modified GP claims
+
+0.1.8.2
+-added /promote command
+-added /demote command
+-added error mesage to claimchunk command for wrong syntax
+-arrows now also give money and xp
+
+0.1.8.3
+-fixed a bug with /joinFaction command if someone tries to join their own faction
+-disabled factions in the end and nether
+
+0.1.8.4
+-added /changeRankNames command
+
+0.1.9
+-added war object
+-added wars
+-added WarThread
+-wars are now also saved on shutdown
+-fixed bug with offline players in /joinfaction command
+
+0.1.9.1
+-killing players now increases warcost
+-capped warscore from single kill at 0.45
+-added uniform error message for invalid syntax in app.java
+-made it such that a faction can only be in one war at a time
+-added endwar thread and method
+-join and leave faction stuff now properly sets you bossbar

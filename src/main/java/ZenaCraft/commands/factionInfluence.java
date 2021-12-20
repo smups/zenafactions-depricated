@@ -17,6 +17,8 @@ public class factionInfluence implements CommandExecutor {
         }
         Player player = (Player) sender;
 
+        if (args.length != 0) return App.invalidSyntax(player);
+
         int factionID = player.getMetadata("factionID").get(0).asInt();
         if (!(App.factionIOstuff.getFactionList().containsKey(factionID))){
             player.sendMessage(App.zenfac + ChatColor.RED + "Error: no faction assigned to player");
