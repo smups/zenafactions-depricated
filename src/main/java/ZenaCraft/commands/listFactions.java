@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
+import ZenaCraft.objects.Faction;
 
 public class listFactions implements CommandExecutor{
     
@@ -21,7 +22,9 @@ public class listFactions implements CommandExecutor{
 
         for (Map.Entry mapElement : App.factionHashMap.entrySet()){
             String key = (String) mapElement.getKey();
-            response += (key + ", ");
+            Faction value = (Faction) mapElement.getValue();
+            int number = value.getMembers().size();
+            response += (key + " (" + String.valueOf(number) + "), ");
         }
         player.sendMessage(response);
         return true;

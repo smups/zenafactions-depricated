@@ -2,6 +2,7 @@ main: ZenaCraft.App
 name: ZenaFactions
 version: 0.1.2
 api-version: 1.16
+depend: ["Vault"]
 commands:
   listFactions:
     description: lists the current server factions
@@ -12,3 +13,9 @@ commands:
   saveDB:
     description: saves databases
     usage: /<command>
+  factionBalance:
+    description: returns faction balance
+    usage: /<command>
+  factionInfluence:
+    description: returns faction influence
+    usage: </command>

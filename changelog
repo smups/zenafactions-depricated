@@ -14,3 +14,13 @@ ZenaFactions Plugin Changelog
 -Added createFaction command
 -Player Join no longer updates the database, now uses system RAM
 -Added savedb command
+
+0.1.3
+-Added Vault support
+-Added config file
+-factions now cost money to create
+-factions now start off with faction_creation_cost in money\
+-added factionBalance command
+-added influence tag to Faction class
+-added factionInfluence command
+-listFactionsnow also shows number of members in a faction

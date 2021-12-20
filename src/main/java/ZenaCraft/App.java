@@ -3,13 +3,19 @@ package ZenaCraft;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import ZenaCraft.commands.createFaction;
+import ZenaCraft.commands.factionBalance;
+import ZenaCraft.commands.factionInfluence;
 import ZenaCraft.commands.listFactions;
 import ZenaCraft.commands.saveDB;
 import ZenaCraft.events.PlayerJoin;
 import ZenaCraft.objects.Faction;
+import net.milkbowl.vault.chat.Chat;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,18 +40,30 @@ public final class App extends JavaPlugin
     public static HashMap<String, Faction> factionHashMap = new HashMap<String, Faction>();
     public static HashMap<UUID, String> playerHashMap = new HashMap<UUID, String>();
 
+    private static Economy econ = null;
+    private static Permission perms = null;
+    private static Chat chat = null;
+
     @Override
     public void onEnable(){
+        //say something to console
+        getLogger().info(zenfac + "Loading ZenaFactions...");
+
         //load config
-        //saveDefaultConfig();
+        saveDefaultConfig();
 
         //intiate db
         initDB();
 
-        //intiate scoreboard
-
-        //say something to console
-        getLogger().info(zenfac + "Loading ZenaFactions...");
+        //Hook into Vault
+        if (!setupEconomy()){
+            getLogger().severe("Plugin disabled, no Vault dependency found!");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        this.setupPermissions();
+        //this.setupChat();
+        getLogger().info("Hooked into Vault!");
 
         //Events
         pm.registerEvents(new PlayerJoin(), this);
@@ -54,6 +72,8 @@ public final class App extends JavaPlugin
         getCommand("listFactions").setExecutor(new listFactions());
         getCommand("createFaction").setExecutor(new createFaction());
         getCommand("saveDB").setExecutor(new saveDB());
+        getCommand("factionBalance").setExecutor(new factionBalance());
+        getCommand("factionInfluence").setExecutor(new factionInfluence());
     }
 
     @Override
@@ -185,5 +205,49 @@ public final class App extends JavaPlugin
         catch (IOException i){
             i.printStackTrace();
         }
+    }
+
+    private boolean setupEconomy(){
+        //Two things can go wrong here
+
+        //no Vault installed
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null){
+            return false;
+        }
+
+        //No economy plugin installed
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null){
+            return false;
+        }
+
+        //Okay so everything is fine, now pass on the economy
+        econ = rsp.getProvider();
+        return econ != null;
+
+    }
+
+    private boolean setupChat() {
+        RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
+        chat = rsp.getProvider();
+        return chat != null;
+    }
+
+    private boolean setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+        return perms != null;
+    }
+
+    public static Economy getEconomy() {
+        return econ;
+    }
+
+    public static Permission getPermissions() {
+        return perms;
+    }
+
+    public static Chat getChat() {
+        return chat;
     }
 }

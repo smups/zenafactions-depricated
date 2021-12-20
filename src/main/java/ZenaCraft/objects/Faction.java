@@ -7,7 +7,8 @@ import java.util.UUID;
 public class Faction implements Serializable{
     String name;
     String[] ranks = {"rank0", "rank1", "rank2"};
-    Double balance;
+    double balance;
+    double influence;
     HashMap<UUID,Integer> members;
     String prefix;
 
@@ -17,6 +18,7 @@ public class Faction implements Serializable{
         balance = Balance;
         members = Members;
         prefix = Prefix;
+        influence = 0;
     }
 
     /*
@@ -44,11 +46,17 @@ public class Faction implements Serializable{
     public void setRanks(String[] newRanks){
         this.ranks = newRanks;
     }
-    public Double getBalance(){
+    public double getBalance(){
         return balance;
     }
-    public void setBalance(Double newBalance){
+    public void setBalance(double newBalance){
         this.balance = newBalance;
+    }
+    public double getInfluence(){
+        return influence;
+    }
+    public void setInfluence(double newInfluence){
+        this.influence = newInfluence;
     }
     public HashMap<UUID,Integer> getMembers(){
         return members;
