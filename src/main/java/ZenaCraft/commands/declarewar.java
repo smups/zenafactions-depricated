@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
@@ -21,6 +22,17 @@ public class declarewar implements CommandExecutor{
         if(args.length != 1) return App.invalidSyntax(p);
         
         Faction attackers = App.factionIOstuff.getPlayerFaction(p);
+        Plugin plugin = App.getPlugin(App.class);
+
+        double warcost = plugin.getConfig().getDouble("warCost");
+
+        if(!p.hasMetadata("declarewar") || !p.getMetadata("declarewar").get(0).asBoolean()){
+            String influenceString = ChatColor.BOLD + String.valueOf(warcost) + ChatColor.RESET + "" + ChatColor.RED + " influence! Type this command again to confirm.";
+            p.sendMessage(App.zenfac + "are you sure you want to declare war? This costs " + influenceString);
+            p.setMetadata("declarewar", new FixedMetadataValue(plugin, true));
+            return true;
+        }
+        p.setMetadata("declarewar", new FixedMetadataValue(plugin, false));
 
         if (attackers == null){
             p.sendMessage(App.zenfac + ChatColor.RED + "you're not a member of a faction, so you can't declare war!");
@@ -53,8 +65,7 @@ public class declarewar implements CommandExecutor{
 
             if (defenders.getName().equals(args[0])){
                 App.warThread.startWar(defenders, attackers, p.getChunk());
-                Plugin plugin = App.getPlugin(App.class);
-                attackers.setInfluence(attackers.getInfluence() - plugin.getConfig().getDouble("warCost"));
+                attackers.setInfluence(attackers.getInfluence() - warcost);
                 App.factionIOstuff.reloadScoreBoard(null);
                 return true;
             }

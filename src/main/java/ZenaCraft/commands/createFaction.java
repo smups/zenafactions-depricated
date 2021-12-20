@@ -32,6 +32,14 @@ public class createFaction implements CommandExecutor{
 
         if (args.length != 1) return App.invalidSyntax(player);
 
+        if(!player.hasMetadata("createFaction") || !player.getMetadata("createFaction").get(0).asBoolean()){
+            player.sendMessage(App.zenfac + "are you sure you want to create a faction? You'll leave your current faction. Type this command again to confirm.");
+            player.setMetadata("createFaction", new FixedMetadataValue(plugin, true));
+            return true;
+        }
+        player.setMetadata("createFaction", new FixedMetadataValue(plugin, false));
+
+
         String name = args[0];
 
         for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
@@ -50,6 +58,8 @@ public class createFaction implements CommandExecutor{
         String[] defaultRanks = {"Founder", "Bigshot", "Member"};
         String prefix = new String(name);
         int newID = (int) App.factionIOstuff.getFactionList().size();
+
+        while (App.factionIOstuff.getFactionList().containsKey(newID)) newID++;
 
         Faction newFaction = new Faction(name, defaultRanks, faction_cost, new HashMap<UUID, Integer>(), prefix, newID, 0xFFFFFF);
 

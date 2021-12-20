@@ -25,8 +25,10 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
+import ZenaCraft.commands.factionBalance;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.War;
+import ZenaCraft.objects.pChunk;
 
 public class WarThread {
     
@@ -192,7 +194,7 @@ public class WarThread {
 
         public void run(){
             War war = new War(defenders, attackers);
-            addWarzone(war, firstChunk, attackers);
+            addWarzone(war, firstChunk, attackers, null);
             setWarMetadata(war, true);
             
             //timer stuff
@@ -242,6 +244,14 @@ public class WarThread {
                 victors = war.getDefenders();
                 losers = war.getAttackers();
             }
+            else return;
+
+            for(Map.Entry mEntry : war.getWarzone().entrySet()){
+                int facID = (int) mEntry.getValue();
+                if (facID != victors.getID()) continue;
+                pChunk pc = (pChunk) mEntry.getKey();
+                App.factionIOstuff.claimChunks(null, pc.getLocation(), victors, null, null);
+            }
 
             if (victors != null) sendVictoryMessage(victors);
             if (losers != null) sendDefeatMessage(losers);
@@ -285,10 +295,29 @@ public class WarThread {
         }
     }
 
-    public void addWarzone(War war, Chunk chunk, Faction agressor){
-        war.addWarzoneChunk(chunk, agressor.getID());
+    @Nullable
+    public void addWarzone(War war, Chunk chunk, Faction agressor, Player player){
+        Chunk c;
+        Faction f;
+        War w;
+
+        if (chunk == null) c = player.getChunk();
+        else c = chunk;
+        if (agressor == null) f = App.factionIOstuff.getPlayerFaction(player);
+        else f = agressor;
+        if (war == null) w = getWarFromFaction(f);
+        else w = war;
+
+        if (w.isWarZone(c)){
+            if (player != null) player.sendMessage(App.zenfac + ChatColor.RED + "you already claimed this chunk!");
+            return;
+        }
+
+        w.addWarzoneChunk(c, f.getID());
+        if (player != null) player.sendMessage(App.zenfac + "added chunk to war demands!");
     }
 
+    //getters en setters
     @Nullable
     public War getWar(UUID id){
         for (War war : onGoingWars){
@@ -306,7 +335,6 @@ public class WarThread {
         return null;
     }
 
-    //getters en setters
     public List<War> getWars(){
         return this.onGoingWars;
     }

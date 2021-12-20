@@ -16,16 +16,21 @@ import org.bukkit.entity.Player;
 import ZenaCraft.App;
 
 public class FactionQChunk implements Serializable{
-    String name;
-    HashMap<UUID,Integer> onlinePlayers = new HashMap<UUID,Integer>();
-    double[] pos = new double[2];
+    static final long serialVersionUID = 100L;
+
+    final String name;
+    final double[] pos;
+    final UUID uuid;
+
+    HashMap<UUID,Integer> onlinePlayers = new HashMap<UUID,Integer>();    
     byte[][] chunkData = new byte[100][100];
 
     public FactionQChunk(String newName, Player player, double[] newPos){
         name = newName;
-        onlinePlayers.put(player.getUniqueId(), 1); //I cannot remember what I wanted with this
+        onlinePlayers.put(player.getUniqueId(), 0); //player : rank
         pos = new double[] {newPos[0], newPos[1]};
         getFQChunkData(newName, newPos);
+        uuid = UUID.randomUUID();
     }
 
     @Override
@@ -37,7 +42,7 @@ public class FactionQChunk implements Serializable{
         return true;
     }
 
-    private void getFQChunkData(String name, double[] pos){
+    private synchronized void getFQChunkData(String name, double[] pos){
         String fileLoc = new String(App.FQChunk_db);
         if (pos[0] > 0 && pos[1] > 0) fileLoc += "Q1/";
         if (pos[0] < 0 && pos[1] > 0) fileLoc += "Q2/";
@@ -81,7 +86,7 @@ public class FactionQChunk implements Serializable{
         }
     }
 
-    public void saveFQChunkData(){
+    public synchronized void saveFQChunkData(){
         String fileLoc = new String(App.FQChunk_db);
         if (pos[0] > 0 && pos[1] > 0) fileLoc += "Q1/";
         if (pos[0] < 0 && pos[1] > 0) fileLoc += "Q2/";
@@ -107,25 +112,25 @@ public class FactionQChunk implements Serializable{
     public String getName(){
         return name;
     }
-    public HashMap<UUID,Integer> getOnlinePlayers(){
+    public synchronized HashMap<UUID,Integer> getOnlinePlayers(){
         return onlinePlayers;
     }
-    public void setOnlinePlayers(HashMap<UUID,Integer> newOnlinePlayers){
+    public synchronized void setOnlinePlayers(HashMap<UUID,Integer> newOnlinePlayers){
         this.onlinePlayers = newOnlinePlayers;
     }
-    public void addOnlinePlayer(Player player){
+    public synchronized void addOnlinePlayer(Player player){
         this.onlinePlayers.put(player.getUniqueId(), 1);
     }
-    public void removeOnlinePlayer(Player player){
+    public synchronized void removeOnlinePlayer(Player player){
         this.onlinePlayers.remove(player.getUniqueId());
     }
     public double[] getPos(){
         return pos;
     }
-    public byte[][] getChunkData(){
+    public synchronized byte[][] getChunkData(){
         return chunkData;
     }
-    public void setChunkData(byte[][] newChunkData){
+    public synchronized void setChunkData(byte[][] newChunkData){
         this.chunkData = newChunkData;
     }
 }

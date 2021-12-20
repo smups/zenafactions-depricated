@@ -31,7 +31,7 @@ public class pChunk implements Serializable{
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
-        //first do the deser
+        //first do the deserelisation
         in.defaultReadObject();
 
         //now do the special stuff

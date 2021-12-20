@@ -3,7 +3,9 @@ package ZenaCraft.objects;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,7 +35,8 @@ public class War implements Serializable{
     private int endSecond;
     private int attackersID;
     private int defendersID;
-    private HashMap<pChunk,Integer> warzone = new HashMap<pChunk, Integer>(); 
+    private HashMap<pChunk,Integer> warzone = new HashMap<pChunk, Integer>();
+    private List<String> warzoneMarkers = new ArrayList<String>(); 
 
     //transient fields
     private transient BossBar defBar;
@@ -171,6 +174,9 @@ public class War implements Serializable{
     public void addWarzoneChunk(Chunk wzChunk, int agressor){
         warzone.put(new pChunk(wzChunk), agressor);
     }
+    public List<String> getWarZoneMarkers(){
+        return this.warzoneMarkers;
+    }
     public void removeWarzoneChunk(Chunk wzChunk){
         warzone.remove(new pChunk(wzChunk));
     }
@@ -210,13 +216,13 @@ public class War implements Serializable{
     public void setPlayerBossBar(Player player){
         Plugin plugin = App.getPlugin(App.class);
 
-        if(defenders.members.containsKey(player.getUniqueId())){
+        if(defenders.getMembers().containsKey(player.getUniqueId())){
             defBar.addPlayer(player);
             player.sendTitle(ChatColor.DARK_RED + "" + ChatColor.BOLD + "War", attackers.getPrefix() + ChatColor.WHITE + " is at war with you!", 10, 50, 20);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 2f);
             player.setMetadata("atWar", new FixedMetadataValue(plugin, true));
         }
-        if(attackers.members.containsKey(player.getUniqueId())){
+        if(attackers.getMembers().containsKey(player.getUniqueId())){
             atBar.addPlayer(player);
             player.sendTitle(ChatColor.DARK_RED + "" + ChatColor.BOLD + "War", defenders.getPrefix() + ChatColor.WHITE + " is at war with you!", 10, 50, 20);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 2f);

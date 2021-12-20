@@ -35,7 +35,7 @@ public class claimChunk  implements CommandExecutor{
             return App.invalidSyntax(player);
         }
 
-        App.factionIOstuff.claimChunks(player, null, radius, null);
+        App.factionIOstuff.claimChunks(player, null, null, radius, null);
         return true;
     }
 }

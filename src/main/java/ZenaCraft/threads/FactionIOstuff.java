@@ -158,7 +158,7 @@ public class FactionIOstuff {
         }
         catch (Exception e) {}
         faction.setInfluence(faction.getInfluence() - player_influence);
-        //if (faction.getMembers().size() == 0) removeFaction(faction);
+        if (faction.getMembers().size() == 0) removeFaction(faction);
         playerHashMap.remove(player.getUniqueId());
 
         //Messages
@@ -257,9 +257,10 @@ public class FactionIOstuff {
         private Player player;
         private Location location;
         private Integer radius;
+        private Faction f;
 
         @Nullable
-        public ClaimChunks(Player player_, Location location_, Integer radius_, Thread waitThread){
+        public ClaimChunks(Player player_, Location location_, Faction faction_, Integer radius_, Thread waitThread){
             player = player_;
             if (location_ != null) location = location_;
             else location = player.getLocation();
@@ -291,12 +292,18 @@ public class FactionIOstuff {
 
         public void run(){
             Chunk chunk = location.getChunk();
+            Faction playerFaction;
 
-            byte playerFaction = player.getMetadata("factionID").get(0).asByte();
-            if (factionHashMap.get((int) playerFaction).getMembers().get(player.getUniqueId()) > 1){
-                player.sendMessage(zenfac + ChatColor.RED + "You don't have to appropriate rank to do this! You have to be at least: " + ChatColor.GREEN + factionHashMap.get((int) playerFaction).getRanks()[1]);
-                return;
+            if (f == null){
+                if (player == null) return;
+                playerFaction = factionHashMap.get((int) (player.getMetadata("factionID").get(0).asByte()));
+
+                if (playerFaction.getMembers().get(player.getUniqueId())> 1){
+                    player.sendMessage(zenfac + ChatColor.RED + "You don't have to appropriate rank to do this! You have to be at least: " + ChatColor.GREEN + playerFaction.getRanks()[1]);
+                    return;
+                }
             }
+            else playerFaction = f;
 
             for (int i = -1*radius; i <= radius; i++){
                 for (int j = -1*radius; j<= radius; j++){
@@ -321,34 +328,52 @@ public class FactionIOstuff {
                     //if it is, claim it!
 
                     //check if faction has enough influence to claim the chunk
-                    double claimCost = plugin.getConfig().getDouble("Claim Influence Cost");
-                    double oldBalance = factionHashMap.get((int) playerFaction).getInfluence();
+                    //IF faction isn't specified
+                    if (f == null){
+                        double claimCost = plugin.getConfig().getDouble("Claim Influence Cost");
+                        double oldBalance = playerFaction.getInfluence();
+    
+                        if (oldBalance < claimCost){
+                            player.sendMessage(zenfac + ChatColor.DARK_RED + "Not enough faction influence to claim chunk!");
+                            continue;
+                        }
 
-                    if (oldBalance < claimCost){
-                        player.sendMessage(zenfac + ChatColor.DARK_RED + "Not enough faction influence to claim chunk!");
-                        continue;
+                        playerFaction.setInfluence(oldBalance - claimCost);
                     }
 
-                    chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)] = playerFaction;
-                    factionHashMap.get((int) playerFaction).setInfluence(oldBalance - claimCost);
+                    //this line does the actual claiming
+                    chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)] = (byte) playerFaction.getID();
 
                     //update scoreboard
                     reloadScoreBoard(null);
 
+                    double[] markerX = new double[] {chunkX*16, chunkX*16 + 16};
+                    double[] markerZ = new double[] {chunkZ*16, chunkZ*16 + 16};
+
+                    //this is ridiculously slow, I hate it!
+                    if (f == null){
+                        for (AreaMarker a : App.getMarkerSet().getAreaMarkers()){
+                            if (a.getCornerX(0) == markerX[0] && a.getCornerX(1) == markerX[1]){
+                                if (a.getCornerZ(0) == markerX[0] && a.getCornerZ(1) == markerX[1]) a.deleteMarker();
+                            }
+                        }
+                    }
+
                     //now do the dynmap thingies
-                    int color = factionHashMap.get((int) playerFaction).getColor();
-                    AreaMarker marker = App.getMarkerSet().createAreaMarker(String.valueOf(chunkX) + String.valueOf(chunkZ), player.getMetadata("faction").get(0).asString(), true, player.getWorld().getName(), new double[] {chunkX*16, chunkX*16 + 16}, new double[] {chunkZ*16, chunkZ*16 + 16}, true);
+                    int color = playerFaction.getColor();
+                    AreaMarker marker = App.getMarkerSet().createAreaMarker(String.valueOf(chunkX) + String.valueOf(chunkZ), player.getMetadata("faction").get(0).asString(), true, player.getWorld().getName(), markerX, markerZ, true);
                     marker.setFillStyle(0.1, color);
                     marker.setLineStyle(1, 0.2, color);
-                    player.sendMessage(zenfac + "Chunk Claimed!");
+
+                    if (player != null) player.sendMessage(zenfac + "Chunk Claimed!");                    
                 }
             }
         }
     }
     //Method om deze class te starten
     @Nullable
-    public void claimChunks(Player player_, Location location_, Integer radius_, Thread waitThread){
-        new ClaimChunks(player_, location_, radius_, waitThread);
+    public void claimChunks(Player player_, Location location_, Faction faction_, Integer radius_, Thread waitThread){
+        new ClaimChunks(player_, location_, faction_, radius_, waitThread);
     }
 
     @Nullable

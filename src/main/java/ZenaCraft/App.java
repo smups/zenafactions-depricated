@@ -10,7 +10,7 @@ import org.dynmap.DynmapAPI;
 import org.dynmap.markers.MarkerSet;
 
 import ZenaCraft.commands.*;
-import ZenaCraft.events.*;
+import ZenaCraft.listeners.*;
 import ZenaCraft.threads.*;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -79,6 +79,8 @@ public final class App extends JavaPlugin
         pm.registerEvents(new mobDeath(), this);
         pm.registerEvents(new PlayerDeath(), this);
         pm.registerEvents(new ModifyClaim(), this);
+        pm.registerEvents(new PlayerDamage(), this);
+        pm.registerEvents(new PlayerTeleport(), this);
 
         //Commands
         getCommand("listFactions").setExecutor(new listFactions());
@@ -99,6 +101,9 @@ public final class App extends JavaPlugin
         getCommand("declarewar").setExecutor(new declarewar());
         getCommand("warscore").setExecutor(new warscore());
         getCommand("listwars").setExecutor(new listwars());
+        getCommand("addtowarzone").setExecutor(new addToWarZone());
+        getCommand("createWarp").setExecutor(new createWarp());
+        getCommand("warp").setExecutor(new warp());
 
         //Hook into Dynmap
         if (!setupMap()){

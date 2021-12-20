@@ -3,5 +3,10 @@ influence per player: 50.0
 default faction name: Capitol Faction
 Claim Influence Cost: 1.0
 deathCost: 3.0
+#Warstuff
 warDuration (h): 24
 warCost: 10.0
+#WarpStuff
+warpCost: 0.01 #Cost per block for a warp
+warpCreationCost: 100 #Cost to create a warp
+warpScale: 1.2 #Scale factor: cost(#warps)=warpCreationCost*(#warps)^warpScale. Set to 0 to disable scaling

@@ -35,7 +35,7 @@ public class setPrefix implements CommandExecutor{
         String newPrefix = "";
 
         if (color.equals(new String("red"))){
-            newPrefix += ChatColor.DARK_RED;
+            newPrefix += ChatColor.RED;
             faction.setColor(0xFF5555);
         }
         if (color.equals(new String("green"))){
@@ -46,15 +46,15 @@ public class setPrefix implements CommandExecutor{
             newPrefix += ChatColor.BLUE;
             faction.setColor(0x5555FF);
         }
-        if (color.equals(new String("dark red"))){
+        if (color.equals(new String("dark_red"))){
             newPrefix += ChatColor.DARK_RED;
             faction.setColor(0xAA0000);
         }
-        if (color.equals(new String("dark green"))){
+        if (color.equals(new String("dark_green"))){
             newPrefix += ChatColor.DARK_GREEN;
             faction.setColor(0x00AA00);
         }
-        if (color.equals(new String("dark blue"))){
+        if (color.equals(new String("dark_blue"))){
             newPrefix += ChatColor.DARK_BLUE;
             faction.setColor(0x0000AA);
         }
@@ -62,7 +62,7 @@ public class setPrefix implements CommandExecutor{
             newPrefix += ChatColor.LIGHT_PURPLE;
             faction.setColor(0xFF55FF);
         }
-        if (color.equals(new String("dark purple"))){
+        if (color.equals(new String("dark_purple"))){
             newPrefix += ChatColor.DARK_PURPLE;
             faction.setColor(0xAA00AA);
         }

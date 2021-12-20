@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.10
+version: 0.1.11.1
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -58,3 +58,12 @@ commands:
   listwars:
     description: lists current wars
     usage: /<command>
+  addToWarZone:
+    description: adds current location to war demands
+    usage: /<command>
+  createWarp:
+    description: creates warp to current location
+    usage: /<command> [warp name]
+  warp:
+    description: warps you to your destination
+    usage: /<command> [warp name]

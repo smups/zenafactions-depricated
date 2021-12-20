@@ -121,7 +121,6 @@ o Changed War datacontainer (version 100):
     - When War is deserialised, transient fields are set (readObject function)
     - Now for the real stuff: accessing common fields
         1. TikTok updates the elapsed time using setAge() - not synchronised
-        2. 
 o Changed pChunk datacontainer:
     - When pChunk is deserialised, transient fields are set (readObject function)
 o Changed WarThread:
@@ -130,3 +129,40 @@ o Changed WarThread:
         - updates elapsed seconds (doesn't have to be synchronised)
         - ends wars if necessary
         - updates remainingTime String
+
+0.1.10.1
+-added music to pvp fights using playerdamageevent
+-chunks now change hands after war
+-dynmap is also updated after war [VERY FUCKING SLOWLY]
+-added /addtowarzone command
+
+0.1.10.2
+-added confirmation messages to some commands
+-added warzone markers to dymap
+
+0.1.10.3 [INCOMPATIBLE DATA]
+o FactionIOStuff.java
+    - fixed a bug with the ClaimChunk class
+o FactionQChunk.java
+    - added serialized version
+    - synchronised methods for getting and setting FQC data
+o CreateClaim.java
+    - admin claims can now always be created
+o ModifyClaim.java
+    - admin claims can now always be modified
+
+0.1.10.4
+- updated to MC 1.16.5
+- warscore shows up below player name
+- anyone can now make claims in the neutral zone
+- teleporting now also calls a playerMoveEvent
+- changed name of event folder to listener folder
+- added Road class (not in use rn)
+
+0.1.11
+- added Warp class
+- players can now set warps
+
+0.1.11.1
+- bugfixes
+- neutral warps are free

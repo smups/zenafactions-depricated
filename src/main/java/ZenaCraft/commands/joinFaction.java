@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
@@ -18,6 +20,14 @@ public class joinFaction implements CommandExecutor{
             return true;
         }
         Player player = (Player) sender;
+        Plugin plugin = App.getPlugin(App.class);
+
+        if(!player.hasMetadata("joinFaction") || !player.getMetadata("joinFaction").get(0).asBoolean()){
+            player.sendMessage(App.zenfac + "are you sure you want to change faction? You'll leave your current faction. Type this command again to confirm.");
+            player.setMetadata("joinFaction", new FixedMetadataValue(plugin, true));
+            return true;
+        }
+        player.setMetadata("joinFaction", new FixedMetadataValue(plugin, false));
 
         //check syntax
         if (args.length != 1) return App.invalidSyntax(player);
