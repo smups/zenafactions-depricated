@@ -13,5 +13,7 @@ warpCreationCost: 100 #Cost to create a warp
 warpScale: 1.2 #Scale factor: cost(#warps)=warpCreationCost*(#warps)^warpScale. Set to 0 to disable scaling
 bindBeaconToFaction: true #do beacons only effect the player 
 #loans
+Currency Symbol: Ƒ #currency symbol used by plugin.
 default interest: 0.01 #default is 1%/hour
 default loan length: 100 #default is 100 hours
+Banner Price: 10

@@ -212,8 +212,37 @@ o PlayerMove: als je FQC wisselt krijg je geen pop up
 0.1.11.6:2
 - beacon effects now only apply to faction that owns the beacon
 
-1.1.12
+0.1.12
 - added loan system
 
-1.1.12.1
+0.1.12.1
 - fixed a bug with legacy Faction deseralization
+
+0.1.0.13
+- complete rework of all command files. They now inherit a template!
+
+0.1.13.1
+- fixed a bug on startup
+
+0.1.13.2
+bugfixes:
+- default faction can no longer be deleted (this was causing bugs)
+- changed formatting of time intervals for loans 
+- fixed formatting issue with /createfaction command
+- fixed formatting issue with /listwarps command
+- fixed bug with loan duration always being 0 seconds
+- fixed bug with loans always expireing after 1 minute
+- fixed formatting issue with loan messages
+- fixed bug with playerjoin event
+features:
+- added myloans command that lists current player loans
+
+0.1.13.3
+features:
+- added an update checker
+- added banner system: factions now have banners
+- added /buyfactionbanner command
+- added /changefactionbanner command
+bugfixes:
+- fixed formatting issue with /changefactionname command
+- fixed formatting issue with /listwarps command

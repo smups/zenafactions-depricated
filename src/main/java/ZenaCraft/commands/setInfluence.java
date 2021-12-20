@@ -3,43 +3,36 @@ package ZenaCraft.commands;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
 
-public class setInfluence implements CommandExecutor{
-    
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
-        if (!(sender instanceof Player)){
-            return true;
-        }
-        Player player = (Player) sender;
+public class SetInfluence extends TemplateCommand{
 
+    public SetInfluence() {super(2);}
+
+    @Override
+    protected boolean run() {
         if (!player.isOp()){
             player.sendMessage(App.zenfac + ChatColor.RED + "Admin command only");
         }
-        
-        if (args.length != 2) return App.invalidSyntax(player);
 
         for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
+
             Faction faction = (Faction) mEntry.getValue();
+
             if (faction.getName().equals(args[0])){
-                try{
-                    faction.setInfluence(Double.parseDouble(args[1]));
-                }
-                catch (Exception e){
-                    return App.invalidSyntax(player);
-                }
+
+                Double influence = formatDouble(args[1]);
+                if (influence == null) return invalidSyntax(player);
+
+                faction.setInfluence(influence);
+
                 App.factionIOstuff.reloadScoreBoard(null);
                 return true;
             }
         }
-        player.sendMessage(App.zenfac + ChatColor.RED + "Faction " + args[0] + " not found!");
-        return true;
+
+        return factionNoExist(player);
     }
 }

@@ -33,21 +33,23 @@ import ZenaCraft.events.AsyncFQCChangeEvent;
 import ZenaCraft.objects.Colour;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.FactionQChunk;
+import ZenaCraft.objects.loans.Loan;
 
 public class FactionIOstuff {
     
-    HashMap<String, FactionQChunk> loadedFQChunks= new HashMap<String, FactionQChunk>();
-    HashMap<UUID, Integer> playerHashMap = new HashMap<UUID, Integer>();
-    HashMap<Integer, Faction> factionHashMap = new HashMap<Integer, Faction>();
+    private HashMap<String, FactionQChunk> loadedFQChunks= new HashMap<String, FactionQChunk>();
+    private HashMap<UUID, Integer> playerHashMap = new HashMap<UUID, Integer>();
+    private HashMap<UUID, List<Loan>> playerLoanMap = new HashMap<UUID, List<Loan>>();
+    private HashMap<Integer, Faction> factionHashMap = new HashMap<Integer, Faction>();
 
-    Plugin plugin = App.getPlugin(App.class);
+    private Plugin plugin = App.getPlugin(App.class);
 
-    String player_db;
-    String faction_db;
-    String zenfac;
-    String FQChunk_db;
-    String default_fname;
-    double player_influence;
+    private String player_db;
+    private String faction_db;
+    private String zenfac;
+    private String FQChunk_db;
+    private String default_fname;
+    private double player_influence;
 
     public FactionIOstuff(String player_db_, String faction_db_, String zenfac_, String FQChunk_db_){
         player_db = player_db_;
@@ -111,6 +113,55 @@ public class FactionIOstuff {
         int rankInt = getPlayerFaction(player).getMembers().get(player.getUniqueId());
         return getPlayerFaction(player).getRanks()[rankInt];
     }
+    //Player loans!
+    public void setPlayerLoanMap(HashMap<UUID, List<Loan>> map){
+        playerLoanMap = map;
+    }
+    public void setPlayerLoans(List<Loan> loans, Player player){
+        if(!playerLoanMap.containsKey(player.getUniqueId())) return;
+        playerLoanMap.replace(player.getUniqueId(), loans);
+    }
+    public void setPlayerLoans(List<Loan> loans, OfflinePlayer player){
+        if(!playerLoanMap.containsKey(player.getUniqueId())) return;
+        playerLoanMap.replace(player.getUniqueId(), loans);
+    }
+    public HashMap<UUID, List<Loan>> getPlayerLoanMap(){
+        return this.getPlayerLoanMap();
+    }
+    public List<Loan> getPlayerLoans(Player player){
+        return playerLoanMap.get(player.getUniqueId());
+    }
+    public List<Loan> getPlayerLoans(OfflinePlayer player){
+        return playerLoanMap.get(player.getUniqueId());
+    }
+    public void addPlayerLoan(Loan loan, Player player){
+        List<Loan> loanlist = playerLoanMap.get(player.getUniqueId());
+        if (loanlist == null) loanlist = new ArrayList<Loan>();
+        loanlist.add(loan);
+        if (loanlist.size() == 1) playerLoanMap.put(player.getUniqueId(), loanlist);
+        else playerLoanMap.replace(player.getUniqueId(), loanlist);
+    }
+    public void addPlayerLoan(Loan loan, OfflinePlayer player){
+        List<Loan> loanlist = playerLoanMap.get(player.getUniqueId());
+        if (loanlist == null) loanlist = new ArrayList<Loan>();
+        loanlist.add(loan);
+        if (loanlist.size() == 1) playerLoanMap.put(player.getUniqueId(), loanlist);
+        else playerLoanMap.replace(player.getUniqueId(), loanlist);
+    }
+    public void removePlayerLoan(Loan loan, Player player){
+        if (!playerLoanMap.containsKey(player.getUniqueId())) return;
+        List<Loan> loanlist = playerLoanMap.get(player.getUniqueId());
+        if (!loanlist.contains(loan)) return;
+        loanlist.remove(loan);
+        playerLoanMap.replace(player.getUniqueId(), loanlist);
+    }
+    public void removePlayerLoan(Loan loan, OfflinePlayer player){
+        if (!playerLoanMap.containsKey(player.getUniqueId())) return;
+        List<Loan> loanlist = playerLoanMap.get(player.getUniqueId());
+        if (!loanlist.contains(loan)) return;
+        loanlist.remove(loan);
+        playerLoanMap.replace(player.getUniqueId(), loanlist);
+    }
 
     //Factions
     public void setFactionList(HashMap<Integer, Faction> FHM){
@@ -126,6 +177,7 @@ public class FactionIOstuff {
         factionHashMap.put(faction.getID(), faction);
     }
     public void removeFaction(Faction faction){
+        if(faction.getID() == 0) return;
         factionHashMap.remove(faction.getID());
         saveDB();
     }

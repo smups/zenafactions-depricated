@@ -16,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
@@ -36,7 +35,7 @@ public class Faction implements Serializable{
     private String prefix;
     private Colour colour;
     private HashMap<String,Warp> warps;
-    private BannerMeta bm;
+    private pItem factionBanner;
 
     //financial stuff
     private double interest = 0.01;
@@ -94,6 +93,11 @@ public class Faction implements Serializable{
         if (loanlength <= 0.01) loanlength = 0.01;
         if (avaliableLoans == null) avaliableLoans = new ArrayList<AvaliableLoan>();
         if (runningLoans == null) runningLoans = new ArrayList<Loan>();
+
+        //since loan list is not persistent, we have to load all the loans
+        for(Loan loan : runningLoans){
+            App.factionIOstuff.addPlayerLoan(loan, loan.getOfflinePlayer());
+        }
     }
 
     private void updatePrefix(){
@@ -147,6 +151,7 @@ public class Faction implements Serializable{
     public void addMember(UUID player, int rank){
         this.members.put(player, rank);
     }
+
     //Ranks
     public void changeRank(UUID player, int rank){
         this.members.replace(player, rank);
@@ -167,6 +172,7 @@ public class Faction implements Serializable{
         this.colour = c;
         updatePrefix();
     }
+
     //warpstuff
     public List<Warp> getWarpList(){
         return new ArrayList<Warp>(warps.values());
@@ -195,8 +201,7 @@ public class Faction implements Serializable{
     public boolean hasWarp(String name){
         return warps.containsKey(name);
     }
-    public void setBanner(ItemStack is){
-    }
+
     //Loans
     public List<Loan> getRunningLoans(){
         return runningLoans;
@@ -213,12 +218,16 @@ public class Faction implements Serializable{
 
         return resp;
     }
-    public void assignLoan(OfflinePlayer p, AvaliableLoan l){
+    public Loan assignLoan(OfflinePlayer p, AvaliableLoan l){
         avaliableLoans.remove(l);
-        runningLoans.add(new Loan(l, p));
+        Loan loan = new Loan(l, p);
+        runningLoans.add(loan);
+        return loan;
     }
-    public void createLoan(double amount){
-        avaliableLoans.add(new AvaliableLoan(this, amount));
+    public AvaliableLoan createLoan(double amount){
+        AvaliableLoan l = new AvaliableLoan(this, amount);
+        avaliableLoans.add(l);
+        return l;
     }
     public void deleteLoan(Loan l){
         runningLoans.remove(l);
@@ -242,5 +251,13 @@ public class Faction implements Serializable{
     }
     public void setInterest(double interest){
         this.interest = interest;
+    }
+
+    //factionbanner
+    public pItem getBanner(){
+        return this.factionBanner;
+    }
+    public void setBanner(ItemStack is){
+        factionBanner = new pItem(is);
     }
 }

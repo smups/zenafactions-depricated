@@ -3,6 +3,9 @@ package ZenaCraft.objects.loans;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+
+import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
 
 public class AvaliableLoan implements Serializable {
@@ -12,18 +15,25 @@ public class AvaliableLoan implements Serializable {
     private final double interest;
     private final double amount;
     private final double loanlength;
+    private final Faction faction;
 
     public AvaliableLoan(Faction f, double amount){
         loanID = UUID.randomUUID();
         this.amount = amount;
         interest = f.getInterest();
         loanlength = f.getLoanLength();
+        faction = f;
+
+        Bukkit.getLogger().info(App.zenfac + "Created loan! ID: " + loanID.toString() +
+            " Amount: " + String.valueOf(this.amount) + " Interest: " +
+            String.valueOf(interest) + " Duration: " + String.valueOf(loanlength));
     }
     public AvaliableLoan(AvaliableLoan that){
         this.loanID = that.getID();
         this.amount = that.getInitAmount();
         this.interest = that.getInterest();
         this.loanlength = that.getLoanLength();
+        this.faction = that.getFaction();
     }
 
     @Override
@@ -52,5 +62,8 @@ public class AvaliableLoan implements Serializable {
     }
     public double getLoanLength(){
         return this.loanlength;
+    }
+    public Faction getFaction(){
+        return this.faction;
     }
 }

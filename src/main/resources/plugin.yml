@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.12.1
+version: 0.1.13.3
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -91,3 +91,18 @@ commands:
   payloan:
     description: pays specified loan from specified faction. If you don't have enough money to pay the loan, a new one will be created.
     usage: </command> [faction] [loan number]
+  depositfaction:
+    description: deposits amount into faction bank account
+    usage: </command> [amount]
+  withdrawfaction:
+    description: withdraws amount from faction bank account
+    usage: </command> [amount]
+  myloans:
+    description: lists your debt; loans that you've taken on with their due dates
+    usage: /<command>
+  changefactionbanner:
+    description: changes faction banner to banner currently in player hand
+    usage: </command>
+  buyfactionbanner:
+    description: buys you a copy of your faction's banner (if your faction has one)
+    usage: </command>

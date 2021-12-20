@@ -1,25 +1,38 @@
 package ZenaCraft.commands;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
 import net.md_5.bungee.api.ChatColor;
 
-public class saveDB implements CommandExecutor{
+public class SaveDB extends TemplateCommand{
+
+    public SaveDB() {super(0);}
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
-        if (sender instanceof Player){
-            Player player = (Player) sender;
+    protected boolean getSender(CommandSender sender) {
+        if(sender instanceof Player){
+            player = (Player) sender;
+            return true;
+        }
+        else{
+            log = Bukkit.getLogger();
+            return true;
+        }
+    }
+
+    @Override
+    protected boolean run() {
+        if (player != null){
             if (!player.isOp()){
                 player.sendMessage(App.zenfac + ChatColor.RED + "You are not permitted to use this command");
                 return true;
             }
         }
-        sender.sendMessage(App.zenfac + "Saving databases");
+
+        if (log != null) log.info(App.zenfac + "saving...");
         App.factionIOstuff.saveDB();;
         return true;
     }

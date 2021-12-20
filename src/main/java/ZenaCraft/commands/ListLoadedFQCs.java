@@ -2,28 +2,40 @@ package ZenaCraft.commands;
 
 import java.util.Map;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
 
-public class ListLoadedFQCs implements CommandExecutor{
+public class ListLoadedFQCs extends TemplateCommand{
+
+    public ListLoadedFQCs() {super(0);}
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args){        
-        if (!(sender instanceof Player)){
+    protected boolean getSender(CommandSender sender) {
+        if(sender instanceof Player){
+            player = (Player) sender;
             return true;
         }
-        Player player = (Player) sender;
+        else{
+            log = Bukkit.getLogger();
+            return true;
+        }
+    }
+
+    @Override
+    protected boolean run() {
         String response = App.zenfac + "Loaded FQC's: ";
 
         for (Map.Entry mapElement : App.factionIOstuff.getLoadedFQChunks().entrySet()){
             String key = (String) mapElement.getKey();
             response += (key + ", ");
         }
-        player.sendMessage(response);
+        
+        if (player != null) player.sendMessage(response);
+        if (log != null) log.info(response);
+
         return true;
     }
 }
