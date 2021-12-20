@@ -11,14 +11,16 @@ public class Faction implements Serializable{
     double influence;
     HashMap<UUID,Integer> members;
     String prefix;
+    int ID;
 
-    public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, String Prefix){
+    public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, String Prefix, int newID){
         name = Name;
         ranks = Ranks;
         balance = Balance;
         members = Members;
         prefix = Prefix;
         influence = 0;
+        ID = newID;
     }
 
     /*
@@ -33,6 +35,7 @@ public class Faction implements Serializable{
         if (o == null || getClass() != o.getClass()) return false;
         Faction faction = (Faction) o;
         if (name != faction.name) return false;
+        if (ID != faction.ID) return false;
         return true;
     }
 
@@ -80,5 +83,8 @@ public class Faction implements Serializable{
     }
     public void setPrefix(String newPrefix){
         this.prefix = newPrefix;
+    }
+    public int getID(){
+        return ID;
     }
 }

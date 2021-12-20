@@ -11,6 +11,7 @@ import ZenaCraft.commands.factionBalance;
 import ZenaCraft.commands.factionInfluence;
 import ZenaCraft.commands.listFactions;
 import ZenaCraft.commands.saveDB;
+import ZenaCraft.commands.setPrefix;
 import ZenaCraft.events.PlayerJoin;
 import ZenaCraft.objects.Faction;
 import net.milkbowl.vault.chat.Chat;
@@ -74,6 +75,7 @@ public final class App extends JavaPlugin
         getCommand("saveDB").setExecutor(new saveDB());
         getCommand("factionBalance").setExecutor(new factionBalance());
         getCommand("factionInfluence").setExecutor(new factionInfluence());
+        getCommand("setPrefix").setExecutor(new setPrefix());
     }
 
     @Override
@@ -142,7 +144,7 @@ public final class App extends JavaPlugin
 
                 HashMap<UUID, Integer> dummyHashMap = new HashMap<UUID, Integer>();
                 String[] defaultRanks = {"Admin", "Staff", "New Player"};
-                Faction defaultFaction = new Faction("default", defaultRanks, 0.0, dummyHashMap, "default");
+                Faction defaultFaction = new Faction("default", defaultRanks, 0.0, dummyHashMap, ChatColor.AQUA + "Int", 0);
 
                 player_factions.put("default", defaultFaction);
                 factionHashMap.put("default", defaultFaction);

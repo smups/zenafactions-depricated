@@ -24,3 +24,9 @@ ZenaFactions Plugin Changelog
 -added influence tag to Faction class
 -added factionInfluence command
 -listFactionsnow also shows number of members in a faction
+
+0.1.4
+-added sidebar scoreboard with faction influence
+-sidebar is still _buggy_
+-added factionID (int) field to faction datastructure
+-added factionID metadata field to player metadata

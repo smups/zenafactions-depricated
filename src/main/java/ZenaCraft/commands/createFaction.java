@@ -3,12 +3,18 @@ package ZenaCraft.commands;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
@@ -42,7 +48,9 @@ public class createFaction implements CommandExecutor{
         HashMap<UUID, Integer> founder = new HashMap<UUID, Integer>();
         founder.put(player.getUniqueId(), 0);
         String[] defaultRanks = {"Founder", "Bigshot", "Member"};
-        Faction newFaction = new Faction(name, defaultRanks, faction_cost, founder, name);
+        String prefix = new String(name);
+        int newID = (int) App.factionHashMap.size();
+        Faction newFaction = new Faction(name, defaultRanks, faction_cost, founder, prefix, newID);
 
         String oldFactionString = player.getMetadata("faction").get(0).asString();
         Faction oldFaction = (Faction) App.factionHashMap.get(oldFactionString);
@@ -55,8 +63,19 @@ public class createFaction implements CommandExecutor{
         App.factionHashMap.put(name, newFaction);
         App.playerHashMap.replace(player.getUniqueId(), name);
 
+        //scoreboard stuff
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        Scoreboard board = manager.getMainScoreboard();
+        Objective objective = board.getObjective(DisplaySlot.SIDEBAR);
+
+        Score score = objective.getScore(newFaction.getPrefix());
+        score.setScore( (int) newFaction.getInfluence());
+        score = objective.getScore(oldFaction.getPrefix());
+        score.setScore( (int) oldFaction.getInfluence());
+
         econ.withdrawPlayer(player, faction_cost);
         player.setMetadata("faction", new FixedMetadataValue(plugin, name));
+        player.setMetadata("factionID", new FixedMetadataValue(plugin, newID));
         player.sendMessage(App.zenfac + ChatColor.DARK_RED + "Created faction: " + name);
         
         return true;
