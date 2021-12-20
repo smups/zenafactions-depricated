@@ -28,6 +28,14 @@ public class Common {
     ChatColor.RED + " If you are a server operator and did not expect this message, please take a look" +
     " at the ZenaFactions config files. Thank you!";
 
+    //ranks and perms
+    public boolean hasPerm(Player player, String perm){
+        if (perm == null) return true;
+        Faction f = App.factionIOstuff.getPlayerFaction(player);
+        if (f == null) return false;
+        return f.getPlayerRank(player).getPerms().contains(perm);
+    }
+
     // Messages
     public boolean opCommand(Player player){
         player.sendMessage(App.zenfac + ChatColor.RED + "Admin command only!");
@@ -41,10 +49,9 @@ public class Common {
         Bukkit.getLogger().info(App.zenfac + ChatColor.RED + "Invalid Syntax! Use /help zenafactions for help");
     }
 
-    public boolean invalidRank(Player player, int rankReq) {
-        Faction f = App.factionIOstuff.getPlayerFaction(player);
+    public boolean invalidRank(Player player, String perm) {
         player.sendMessage(App.zenfac + ChatColor.RED + "You don't have the appropriate rank to do this!"
-                + " You have to be at least: " + f.getColour().asString() + f.getRanks()[rankReq]);
+                + " You have to have the permission: " + perm);
         return true;
     }
 
@@ -87,6 +94,16 @@ public class Common {
         ChatColor.RESET + " " + ChatColor.RED + "and welcome to the Server! " + gdpr;
 
         player.sendMessage(msg);
+    }
+    @Nullable
+    public boolean rankNoExist(Player player, String rName){
+        if (rName == null){
+            player.sendMessage(App.zenfac + ChatColor.RED + "That rank doesn't exist!");
+        }
+        else{
+            player.sendMessage(App.zenfac + ChatColor.RED + "Rank " + rName + " does not exist!");
+        }
+        return true;
     }
 
     // Formats

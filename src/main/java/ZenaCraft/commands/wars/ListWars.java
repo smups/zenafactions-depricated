@@ -29,9 +29,9 @@ public class ListWars extends TemplateCommand{
 
     @Override
     protected boolean run() {
-        String reply = App.zenfac + "Ongoing wars: ";
+        String reply = App.zenfac + "Ongoing wars:\n";
         for (War war : App.warThread.getWars()){
-            reply += (war.getAttackers().getPrefix() + ChatColor.RESET + " VS " + war.getDefenders().getPrefix() + ", ");
+            reply += (war.getAttackers().getPrefix() + ChatColor.RESET + " VS " + war.getDefenders().getPrefix() + ",\n");
         }
 
         if (player != null) player.sendMessage(reply);

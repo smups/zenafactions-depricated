@@ -37,7 +37,7 @@ public class JoinFaction extends TemplateCommand{
             Faction faction = (Faction) mEntry.getValue();
 
             if (faction.getName().equals(args[0])){
-                App.factionIOstuff.changePlayerFaction(faction, player, 2);
+                App.factionIOstuff.changePlayerFaction(faction, player);
                 player.sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the faction: " + ChatColor.BOLD + faction.getPrefix());
                 return true;
             }

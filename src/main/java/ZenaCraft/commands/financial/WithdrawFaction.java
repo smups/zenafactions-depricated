@@ -10,7 +10,7 @@ import net.milkbowl.vault.economy.Economy;
 public class WithdrawFaction extends TemplateCommand{
 
     public WithdrawFaction(){
-        super(1);
+        super(1, true, 1);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class WithdrawFaction extends TemplateCommand{
 
         if(f.getBalance() < amount) return insufficientFactionFunds(player);
 
-        if(f.getPlayerRank(player) > 1) return invalidRank(player, 1);
+        if(hasPerm(player)) return invalidRank(player);
 
         Economy econ = App.getEconomy();
         econ.depositPlayer(player, amount);

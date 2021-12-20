@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,20 +27,25 @@ public class Warp implements Serializable{
     private final String name;
 
     private double factionTax = 0;
-    private int rankReq = 2;
+    private int rankReq;
+
+    //new rank system integration
+    private String perm;
 
     transient Location loc;
 
-    public Warp(Location loc, String name){
+    public Warp(Location loc, String name) {
         this.name = name;
         this.loc = loc;
         X = loc.getX();
         Y = loc.getY();
         Z = loc.getZ();
+        perm = "warp." + name;
         wUuid = loc.getWorld().getUID();
     }
+
     // copy constructor
-    public Warp(Warp that){
+    public Warp(Warp that) {
         this.name = that.name;
         this.loc = that.loc;
         this.X = that.X;
@@ -48,14 +54,15 @@ public class Warp implements Serializable{
         this.wUuid = that.wUuid;
         this.factionTax = that.factionTax;
         this.rankReq = that.rankReq;
+        this.perm = that.perm;
     }
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
-        //first do the deserelisation
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // first do the deserelisation
         in.defaultReadObject();
 
-        //now for the special things
-        loc = new Location(Bukkit.getWorld(wUuid), X, Y, Z);
+        // now for the special things
+        loc = new Location(Bukkit.getWorld(wUuid), X, Y, Z);           
     }
 
     @Override
@@ -84,11 +91,12 @@ public class Warp implements Serializable{
 
         Faction faction = App.factionIOstuff.getPlayerFaction(player);
 
-        if (faction.getPlayerRank(player) > rankReq){
-            player.sendMessage(App.zenfac + ChatColor.RED + "You don't have have the appropriate rank to warp here!" + 
-            "You have to be at least: " + ChatColor.BOLD + faction.getRanks()[rankReq]);
-            player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), false));
-            return;
+        if (faction.getID() != 0){
+            if (!faction.getPlayerRank(player).hasPerm(perm)){
+                App.getCommon().invalidRank(player, perm);
+                player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), false));
+                return;
+            }
         }
 
         if (!player.hasMetadata("warpPlayer") || !player.getMetadata("warpPlayer").get(0).asBoolean()){
@@ -140,10 +148,13 @@ public class Warp implements Serializable{
     public void setFactionTax(double factionTax){
         this.factionTax = factionTax;
     }
-    public int getRankReq(){
-        return this.rankReq;
+    public int getOldRankReq(){
+        return rankReq;
     }
-    public void setRankReq(int rank){
-        this.rankReq = rank;
+    public String getPerm(){
+        return this.perm;
+    }
+    public void setPerm(){
+        this.perm = "warp." + name;
     }
 }

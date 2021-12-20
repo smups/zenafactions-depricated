@@ -1,5 +1,6 @@
 package ZenaCraft.events;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -12,13 +13,15 @@ public class ModifyWarpEvent extends Event{
 
     private Warp warp;
     private Faction faction;
+    private Player player;
     private boolean isAlive;
 
-    public ModifyWarpEvent(Warp warp, Faction faction, boolean isAlive){
+    public ModifyWarpEvent(Warp warp, Faction faction, Player player, boolean isAlive){
         super(false); //not async!
         this.warp = warp;
         this.isAlive = isAlive;
         this.faction = faction;
+        this.player = player;
     }
 
     @Override
@@ -39,5 +42,8 @@ public class ModifyWarpEvent extends Event{
     }
     public Faction getFaction(){
         return faction;
+    }
+    public Player getPlayer(){
+        return player;
     }
 }

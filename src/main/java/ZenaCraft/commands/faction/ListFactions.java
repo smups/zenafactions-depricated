@@ -33,7 +33,7 @@ public class ListFactions extends TemplateCommand{
         for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
             Faction value = (Faction) mapElement.getValue();
             int number = value.getMembers().size();
-            response += (value.getPrefix() + " (" + String.valueOf(number) + "), ");
+            response += (value.getPrefix() + " (" + String.valueOf(number) + "), \n");
         }
 
         if(player != null) player.sendMessage(response);

@@ -1,8 +1,6 @@
 package ZenaCraft.commands.faction;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
@@ -46,7 +44,6 @@ public class CreateFaction extends TemplateCommand{
 
         if (econ.getBalance(player) < faction_cost) return insufficientFunds(player);
 
-        String[] defaultRanks = {"Founder", "Bigshot", "Member"};
         Colour c = new Colour(0xFFFFFF, org.bukkit.ChatColor.WHITE);
 
         int newID = 0;
@@ -55,11 +52,11 @@ public class CreateFaction extends TemplateCommand{
             newID++;
         }
 
-        Faction newFaction = new Faction(name, defaultRanks, faction_cost, new HashMap<UUID, Integer>(), newID, c);
+        Faction newFaction = new Faction(name, faction_cost, player, newID, c);
 
         App.factionIOstuff.addFaction(newFaction);
 
-        App.factionIOstuff.changePlayerFaction(newFaction, player, 0);
+        App.factionIOstuff.changePlayerFaction(newFaction, player);
 
         //scoreboard stuff
         App.factionIOstuff.reloadScoreBoard(null);

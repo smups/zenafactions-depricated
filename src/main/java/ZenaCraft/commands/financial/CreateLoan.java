@@ -8,7 +8,7 @@ import ZenaCraft.objects.Faction;
 
 public class CreateLoan extends TemplateCommand{
 
-    public CreateLoan() {super(1);}
+    public CreateLoan() {super(1, true, 1);}
 
     @Override
     protected boolean run() {
@@ -19,7 +19,7 @@ public class CreateLoan extends TemplateCommand{
 
         if(f.getBalance() < amount) return insufficientFactionFunds(player);
 
-        if (f.getMembers().get(player.getUniqueId()) > 1) return invalidRank(player, 1);
+        if (hasPerm(player)) return invalidRank(player);
         
         f.removeBalance(amount);
         f.createLoan(amount);

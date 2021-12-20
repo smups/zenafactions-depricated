@@ -12,7 +12,7 @@ import ZenaCraft.objects.Faction;
 
 public class ChangeFactionBanner extends TemplateCommand{
 
-    public ChangeFactionBanner() {super(0);}
+    public ChangeFactionBanner() {super(0, true, 0);}
 
     @Override
     protected boolean run() {
@@ -34,7 +34,7 @@ public class ChangeFactionBanner extends TemplateCommand{
 
         hand.setItemMeta(im);
 
-        if(f.getPlayerRank(player) != 0) return invalidRank(player, 0);
+        if(!hasPerm(player)) return invalidRank(player);
 
         f.setBanner(hand);
         player.sendMessage(App.zenfac + "Changed faction banner!");

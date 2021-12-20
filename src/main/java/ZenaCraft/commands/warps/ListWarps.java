@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import ZenaCraft.App;
 import ZenaCraft.commands.TemplateCommand;
 import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.Rank;
 import ZenaCraft.objects.Warp;
 
 public class ListWarps extends TemplateCommand{
@@ -24,15 +25,15 @@ public class ListWarps extends TemplateCommand{
             return true;
         }
 
-        int rank = faction.getPlayerRank(player);
-        String response = App.zenfac + "Avaliable warps (" + String.valueOf(wList.size()) + "): ";
+        Rank rank = faction.getPlayerRank(player);
+        String response = App.zenfac + "Avaliable warps (" + String.valueOf(wList.size()) + "):\n";
 
 
-        response += ChatColor.RESET + "[" + faction.getPrefix() + ChatColor.RESET + "] ";
+        response += ChatColor.RESET + "[" + faction.getPrefix() + ChatColor.RESET + "]\n";
         for(Warp w : wList){
-            if (w.getRankReq() < rank) continue;
+            if (!rank.hasPerm(w.getPerm())) continue;
             response += w.getName() + ChatColor.WHITE + " (";
-            response += formatMoney(w.calcWarpCost(player)) + ChatColor.WHITE + "), ";
+            response += formatMoney(w.calcWarpCost(player)) + ChatColor.WHITE + "),\n";
         }
 
 
@@ -44,13 +45,12 @@ public class ListWarps extends TemplateCommand{
             return true;
         }
 
-        response += "[" + defaulFaction.getPrefix() + "] " + ChatColor.RESET;
+        response += "[" + defaulFaction.getPrefix() + "]\n" + ChatColor.RESET;
         wList = defaulFaction.getWarpList();
         
         for(Warp w : wList){
-            if (w.getRankReq() < rank) continue;
             response += w.getName() + ChatColor.WHITE + "(" ;
-            response += formatMoney(w.calcWarpCost(player)) + ChatColor.WHITE + "), ";
+            response += formatMoney(w.calcWarpCost(player)) + ChatColor.WHITE + "),\n";
         }
 
         player.sendMessage(response);

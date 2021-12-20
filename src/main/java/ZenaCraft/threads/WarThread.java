@@ -76,6 +76,12 @@ public class WarThread {
 
         public InitDB(){
             this.start();
+            try{
+                t.join();
+            }
+            catch(InterruptedException i){
+                Bukkit.getLogger().severe(App.zenfac + i.getLocalizedMessage());
+            }
         }
 
         public void start(){
@@ -118,7 +124,7 @@ public class WarThread {
                         setWarMetadata(war, true);
 
                         Timer t = new Timer();
-                        t.schedule(new TikTok(war), 0, 1000);
+                        t.schedule(new TikTok(war), (int) Math.random()*1000, 1000);
                         tickingTimers.add(t);
                     }
                 }

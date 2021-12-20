@@ -15,18 +15,18 @@ public class ListLoans extends TemplateCommand{
 
     @Override
     protected boolean run() {
-        String response = App.zenfac + "Avaliable loans: ";
+        String response = App.zenfac + "Avaliable loans:\n";
 
         for(Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
             Faction f = (Faction) mEntry.getValue();
-            response += ChatColor.WHITE + "[" + f.getPrefix() + ChatColor.WHITE + "]: ";
+            response += ChatColor.WHITE + "[" + f.getPrefix() + ChatColor.WHITE + "]:\n";
             
             int i = 1;
             for(AvaliableLoan l : f.getAvaliableLoans()){
                 response += "Loan [" + String.valueOf(i) + "] ";
                 response += formatMoney(l.getInitAmount());
                 response += ChatColor.BOLD + " " + ChatColor.RED + "@" + formatPercent(l.getInterest());
-                response += ChatColor.RESET + ", ";
+                response += ChatColor.RESET + ",\n";
                 i++;
             }
         }

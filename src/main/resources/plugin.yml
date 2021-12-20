@@ -1,8 +1,9 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.14.2
+version: 0.1.15.2
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
+loadbefore: ["ZFDynmap", "ZFDiscord"]
 commands:
   listFactions:
     description: lists the current server factions
@@ -37,12 +38,6 @@ commands:
   joinFaction:
     description: leave your current faction and join a new one in the lowest rank
     usage: /<command> [faction]
-  promote:
-    description: promotes the specified player one rank
-    usage: /<command> [player to be promoted]
-  demote:
-    description: demotes the specified player one rank
-    usage: /<command> [player to be demoted]
   changeRankNames: 
     description: changes the names of the ranks in your faction
     usage: </command> [Highest rank] [Middle rank] [lowest rank]
@@ -76,9 +71,6 @@ commands:
   setwarptax:
     description: changes the tax (in %) that your faction collects over the cost of the specified warp.
     usage: /<command> [warp name] [tax in %]
-  setwarprank:
-    description: changes the minimum rank required to use this warp.
-    usage: /<command> [warp name] [rank name]
   createloan:
     description: creates a loan. Everyone may accept this loan, not just members of your faction!
     usage: /<command> [amount to loan]
@@ -109,3 +101,27 @@ commands:
   lognow:
     description: dumps log files right now
     usage: </command>
+  createrank:
+    description: creates a new rank by copying another rank (keyword copy), or by creating a rank from scratch (keyword new)
+    usage: </command> [copy|new] [rank to copy | new rank name] [new rank name | x]
+  removerank:
+    description: removes rank. Note that you can't remove the default rank and factions can't have fewer than 3 ranks!
+    usage: </command> [rank]
+  changerank:
+    description: changes player rank
+    usage: </command> [player] [new rank]
+  makewarpprivate:
+    description: makes warp private (only players of your rank can use the warp)
+    usage: </command> [warp name]
+  allowwarp:
+    description: allows players of specified rank to use private warp
+    usage: </command> [warp] [rank]
+  listperms:
+    description: lists all possible permissions that may be added to ranks
+    usage: </command>
+  addrankperm:
+    description: adds permission to rank
+    usage: </command> [rank] [perm]
+  removerankperm:
+    description: removes permission from rank
+    usage: </command> [rank] [perm]

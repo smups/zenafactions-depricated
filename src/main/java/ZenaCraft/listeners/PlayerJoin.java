@@ -26,9 +26,11 @@ public class PlayerJoin implements Listener{
             //Add player to default faction with lowest rank
             //and give him some metadata
             Faction defaultFaction = App.factionIOstuff.getFaction(0);
-            int rank = 2;
-            if (player.isOp()) rank = 0;
-            App.factionIOstuff.addPlayerToFaction(defaultFaction, player, rank);
+
+            if (!player.isOp())
+                App.factionIOstuff.addPlayerToFaction(defaultFaction, player);
+            else
+                App.factionIOstuff.addPlayerToFaction(defaultFaction, player, defaultFaction.getRanks().get(0));
 
             event.getPlayer().sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the international faction!");
 

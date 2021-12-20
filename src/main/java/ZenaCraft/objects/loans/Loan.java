@@ -27,7 +27,6 @@ public class Loan extends AvaliableLoan{
 
     private transient Timer t;
 
-
     public Loan(AvaliableLoan l, OfflinePlayer p){
         //assigns Avaliableloan to player
 
@@ -55,7 +54,7 @@ public class Loan extends AvaliableLoan{
 
         //start the clock, checking if the player has paid (every min or so)!
         t = new Timer();
-        t.schedule(new TikTok(), 60*1000); //timer runs every minute
+        t.schedule(new TikTok(), 0, 60*1000); //timer runs every minute
 
         Bukkit.getLogger().info("Assigned Loan! LoanID: " + getID().toString() +
             " PlayerID: " + player.toString() + " Expiredate: " + expiredate.toString() +
@@ -67,7 +66,7 @@ public class Loan extends AvaliableLoan{
         in.defaultReadObject();
 
         t = new Timer();
-        t.schedule(new TikTok(), 60*1000);
+        t.schedule(new TikTok(), (int) Math.random()*1000, 60*1000);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException{

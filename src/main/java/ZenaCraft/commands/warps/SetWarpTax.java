@@ -1,13 +1,8 @@
 package ZenaCraft.commands.warps;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
 import ZenaCraft.commands.TemplateCommand;
@@ -16,7 +11,7 @@ import ZenaCraft.objects.Warp;
 
 public class SetWarpTax extends TemplateCommand{
 
-    public SetWarpTax() {super(2);}
+    public SetWarpTax() {super(2, true, 1);}
 
     @Override
     protected boolean run() {
@@ -39,11 +34,9 @@ public class SetWarpTax extends TemplateCommand{
             player.sendMessage(App.zenfac + ChatColor.RED + "That warp doesn't exist!");
             return true;
         }
-
-        int rankreq = 1;
-        if (change.getRankReq() < rankreq) rankreq = change.getRankReq();
         
-        if (faction.getPlayerRank(player) > rankreq) return invalidRank(player, rankreq);
+        if(!hasPerm(player)) return invalidRank(player);
+        if (!faction.getPlayerRank(player).hasPerm(change.getPerm())) return invalidRank(player);
 
         Double factiontax = formatDouble(args[1]);
         if (factiontax == null) return invalidSyntax(player);

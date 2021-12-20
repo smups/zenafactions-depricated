@@ -12,7 +12,7 @@ import ZenaCraft.objects.Faction;
 
 public class DeclareWar extends TemplateCommand{
 
-    public DeclareWar() {super(1);}
+    public DeclareWar() {super(1, true, 0);}
 
     @Override
     protected boolean run() {
@@ -34,7 +34,7 @@ public class DeclareWar extends TemplateCommand{
             return true;
         }
 
-        if (attackers.getMembers().get(player.getUniqueId()) != 0) return invalidRank(player, 0);
+        if (!hasPerm(player)) return invalidRank(player);
 
         if (App.warThread.getWarFromFaction(attackers) != null){
             player.sendMessage(App.zenfac + ChatColor.RED + "you are already at war with someone!");

@@ -9,7 +9,7 @@ import ZenaCraft.objects.Faction;
 
 public class ChangeColour extends TemplateCommand{
 
-    public ChangeColour(){super(1);}
+    public ChangeColour(){super(1, true, 0);}
 
     @Override
     protected boolean run() {
@@ -17,7 +17,7 @@ public class ChangeColour extends TemplateCommand{
 
         Faction faction = (Faction) App.factionIOstuff.getPlayerFaction(player);
 
-        if (faction.getMembers().get(player.getUniqueId()) != 0) return invalidRank(player, 0);
+        if (!hasPerm(player)) return invalidRank(player);
 
         if (color.equals(new String("black"))){
             Colour c = new Colour(0x000000, ChatColor.BLACK);

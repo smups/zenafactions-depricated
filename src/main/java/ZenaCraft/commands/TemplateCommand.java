@@ -20,8 +20,24 @@ public class TemplateCommand implements CommandExecutor{
     protected Logger log;
     protected String[] args;
 
+    protected final String perm;
+
     public TemplateCommand(int argSize){
         super();
+        perm = null;   
+        this.argSize = argSize;
+        common = App.getCommon();
+    }
+    public TemplateCommand(){
+        super();
+        perm = null;
+        argSize = 0;
+        common = App.getCommon();
+    }
+    public TemplateCommand(int argSize, boolean protected_command, int def){
+        super();
+        perm = this.getClass().toString().split(" ")[1].strip();
+        if (protected_command) App.registerPerm(perm, def);
         this.argSize = argSize;
         common = App.getCommon();
     }
@@ -72,8 +88,15 @@ public class TemplateCommand implements CommandExecutor{
         return common.invalidSyntax(player);
     }
 
-    protected boolean invalidRank(Player player, int rankReq){
-        return common.invalidRank(player, rankReq);
+    protected boolean invalidRank(Player player){
+        return common.invalidRank(player, this.perm);
+    }
+    protected boolean invalidRank(Player player, String perm){
+        return common.invalidRank(player, perm);
+    }
+
+    protected boolean hasPerm(Player player){
+        return common.hasPerm(player, this.perm);
     }
 
     protected boolean insufficientFunds(Player player){
@@ -104,6 +127,13 @@ public class TemplateCommand implements CommandExecutor{
 
     protected boolean opCommand(Player player){
         return common.opCommand(player);
+    }
+
+    protected boolean rankNoExist(Player player){
+        return common.rankNoExist(player, null);
+    }
+    protected boolean rankNoExist(Player player, String rName){
+        return common.rankNoExist(player, rName);
     }
 
     protected Double formatDouble(String st){

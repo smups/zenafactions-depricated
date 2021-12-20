@@ -34,7 +34,7 @@ public class PlayerDeath implements Listener{
 
             if (deadFaction.getID() != killerFaction.getID()){
                 deathCost += 10;
-                deathCost *= (3 - deadFaction.getMembers().get(dead.getUniqueId()));
+                deathCost *= 1 + deadFaction.getMembers().get(dead.getUniqueId()).getLevel()/App.permList.size();
                 double warscore = deathCost/((double) 100 * deadFaction.getMembers().size());
                 if (warscore > 0.45) warscore = 0.45;
 

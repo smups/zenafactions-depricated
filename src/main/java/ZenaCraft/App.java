@@ -16,9 +16,11 @@ import ZenaCraft.commands.claims.*;
 import ZenaCraft.commands.financial.*;
 import ZenaCraft.commands.warps.*;
 import ZenaCraft.commands.wars.*;
+import ZenaCraft.commands.ranks.*;
 import ZenaCraft.commands.*;
 
 import ZenaCraft.listeners.*;
+import ZenaCraft.objects.Rank;
 import ZenaCraft.threads.*;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -29,6 +31,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -44,6 +48,13 @@ public final class App extends JavaPlugin
     public static String faction_db = "plugins/ZenaFactions/dat/factions.ser";
     public static String FQChunk_db = "plugins/ZenaFactions/dat/";
     public static String war_db = "plugins/ZenaFactions/dat/wars.ser";
+
+    //perms
+    public static List<String> permList = new ArrayList<String>();
+    public static List<Rank> defranks = new ArrayList<Rank>();
+    public static List<String> lvl1_perms = new ArrayList<String>();
+    public static List<String> lvl2_perms = new ArrayList<String>();
+    public static List<String> lvl3_perms = new ArrayList<String>();
 
     private static Common common;
 
@@ -79,9 +90,6 @@ public final class App extends JavaPlugin
 
         // load config
         saveDefaultConfig();
-
-        // intiate db
-        factionIOstuff = new FactionIOstuff(player_db, faction_db, zenfac, FQChunk_db);
 
         //start performance loggin
         if(getConfig().getBoolean("Performance logging"))
@@ -132,9 +140,9 @@ public final class App extends JavaPlugin
         getCommand("listMembers").setExecutor(new ListMembers());
         getCommand("setInfluence").setExecutor(new SetInfluence());
         getCommand("joinFaction").setExecutor(new JoinFaction());
-        getCommand("promote").setExecutor(new Promote());
-        getCommand("demote").setExecutor(new Demote());
-        getCommand("changeRankNames").setExecutor(new SetRankNames());
+        //getCommand("promote").setExecutor(new Promote()); -- depricated
+        //getCommand("demote").setExecutor(new Demote()); -- depricated
+        //getCommand("changeRankNames").setExecutor(new SetRankNames()); -- depricated
         getCommand("declarewar").setExecutor(new DeclareWar());
         getCommand("warscore").setExecutor(new WarScore());
         getCommand("listwars").setExecutor(new ListWars());
@@ -145,7 +153,7 @@ public final class App extends JavaPlugin
         getCommand("changefactioncolour").setExecutor(new ChangeColour());
         getCommand("changefactionname").setExecutor(new ChangeFactionName());
         getCommand("setwarptax").setExecutor(new SetWarpTax());
-        getCommand("setwarprank").setExecutor(new SetWarpRequirement());
+        //getCommand("setwarprank").setExecutor(new SetWarpRequirement()); -- depricated
         getCommand("createloan").setExecutor(new CreateLoan());
         getCommand("listloans").setExecutor(new ListLoans());
         getCommand("takeloan").setExecutor(new TakeLoan());
@@ -156,24 +164,36 @@ public final class App extends JavaPlugin
         getCommand("buyfactionbanner").setExecutor(new BuyFactionBanner());
         getCommand("changefactionbanner").setExecutor(new ChangeFactionBanner());
         getCommand("lognow").setExecutor(new LogNow());
+        getCommand("createrank").setExecutor(new CreateRank());
+        getCommand("removerank").setExecutor(new RemoveRank());
+        getCommand("changerank").setExecutor(new ChangeRank());
+        getCommand("makewarpprivate").setExecutor(new MakeWarpPrivate());
+        getCommand("allowwarp").setExecutor(new AllowWarp());
+        getCommand("listperms").setExecutor(new ListPerms());
+        getCommand("addrankperm").setExecutor(new AddRankPerm());
+        getCommand("removerankperm").setExecutor(new RemoveRankPerm());
+
+        //all the ranks are now loaded, so we can create the default ranks:
+        Rank lvl1 = new Rank(getConfig().getString("Default Rank name lvl1"));
+        lvl1.setPerms(lvl1_perms);
+        defranks.add(lvl1);
+        Rank lvl2 = new Rank(getConfig().getString("Default Rank name lvl2"));
+        lvl2.setPerms(lvl2_perms);
+        defranks.add(lvl2);
+        Rank lvl3 = new Rank(getConfig().getString("Default Rank name lvl3"));
+        lvl3.setPerms(lvl3_perms);
+        defranks.add(lvl3);
+
+        // intiate db
+        factionIOstuff = new FactionIOstuff(player_db, faction_db, zenfac, FQChunk_db);
 
         // all the way at the end we setup the war database
         warThread = new WarThread(war_db);
 
-        //and we do a little version check
-        String newVersionTitle = getNewestVersion();
-        double newVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
-
-        if (newVersion > currentVersion){
-            log.warning(App.zenfac + "New version: v" + newVersionTitle + " found!" + 
-                " Please update your ZenaFactions Install!");
-        }
-        else log.info(App.zenfac + "ZenaFactions is uptodate!");
-
         //and setup the version checker
         long hourint = getConfig().getLong("Version check interval");
         t = new Timer();
-        t.schedule(new TikTok(), hourint*1000*3600);
+        t.schedule(new TikTok(), 0, hourint*1000*3600);
     }
 
     @Override
@@ -202,18 +222,18 @@ public final class App extends JavaPlugin
             String newVersionTitle = getNewestVersion();
             if (newVersionTitle == null) return;
 
-            double newVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
+            double newVersion = Double.valueOf(newVersionTitle.replaceAll("\\.", ""));
 
             String msg;
 
             if (newVersion > currentVersion){
-               msg = "New version: v" + newVersionTitle + " found!" + 
-                " Please update your ZenaFactions Install! You can download the new version from: " +
+               msg = "New version: v" + newVersionTitle + " found! (Current version: v" + currentVersionTitle + 
+                ") Please update your ZenaFactions Install! You can download the new version from: " +
                 "https://dev.bukkit.org/projects/zenafactions/files/latest";
                 log.warning(App.zenfac + msg);
             }
             else{
-                msg = ChatColor.DARK_GRAY + "ZenaFactions is uptodate!";
+                msg = ChatColor.DARK_GRAY + "Newest version: v" + newVersionTitle + ", current version: " + currentVersionTitle + ", ZenaFactions is up to date!";
                 log.info(App.zenfac + msg);
             }
 
@@ -284,9 +304,17 @@ public final class App extends JavaPlugin
         return true;
     }
 
+    //permission list
+    public static void registerPerm(String perm, int def){
+        if (def == 0) lvl1_perms.add(perm);
+        else if (def == 1) lvl2_perms.add(perm);
+        else if (def == 2) lvl3_perms.add(perm);
+        permList.add(perm);
+    }
+
     private String getNewestVersion(){
         try{
-            URL url = new URL("https://api.curseforge.com/servermods/files?projectids=441588");
+            URL url = new URL("https://servermods.forgesvc.net/servermods/files?projectids=441588");
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             final String response = reader.readLine();

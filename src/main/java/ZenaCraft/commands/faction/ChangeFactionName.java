@@ -6,7 +6,7 @@ import ZenaCraft.objects.Faction;
 
 public class ChangeFactionName extends TemplateCommand{
 
-    public ChangeFactionName() {super(1);}
+    public ChangeFactionName() {super(1, true, 0);}
 
     @Override
     protected boolean run() {
@@ -14,7 +14,7 @@ public class ChangeFactionName extends TemplateCommand{
 
         Faction faction = (Faction) App.factionIOstuff.getPlayerFaction(player);
 
-        if(faction.getMembers().get(player.getUniqueId()) != 0) return invalidRank(player, 0);
+        if(hasPerm(player)) return invalidRank(player);
 
         faction.setName(name);
         player.sendMessage(App.zenfac + "Changed faction name!");

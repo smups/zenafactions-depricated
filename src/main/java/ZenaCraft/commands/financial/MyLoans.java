@@ -21,13 +21,13 @@ public class MyLoans extends TemplateCommand{
             return true;
         }
 
-        String resp = App.zenfac + ChatColor.WHITE + "Running loans (" + String.valueOf(loanlist.size()) + "): ";
+        String resp = App.zenfac + ChatColor.WHITE + "Running loans (" + String.valueOf(loanlist.size()) + "):\n";
 
         for(Loan l : loanlist){
             resp += "[" + l.getFaction().getPrefix() + ChatColor.RESET + "] ";
             resp += "Loaned amount: " + formatMoney(l.getInitAmount()) + ChatColor.RESET + " ";
             resp += "Amount due: " + formatMoney(l.getCurrentPrice()) + ChatColor.RESET + " ";
-            resp += "Due in: " + formatDateTime(l.getTimeTillExpire()) +  " ";
+            resp += "Due in: " + formatDateTime(l.getTimeTillExpire()) +  "\n";
         }
 
         player.sendMessage(resp);

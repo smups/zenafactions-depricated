@@ -12,6 +12,7 @@ import java.util.TimerTask;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
@@ -46,7 +47,7 @@ public class PerfCheckThread {
         }
 
         t = new Timer();
-        t.schedule(new SaveDat(), 1000*3600);
+        t.schedule(new SaveDat(),1000*(3600 + 5), 1000*3600);
 
     }
 
@@ -66,7 +67,7 @@ public class PerfCheckThread {
     }
 
     private void save(){
-        Bukkit.getLogger().info(App.zenfac + "writing log data...");
+        Bukkit.getLogger().info(App.zenfac + ChatColor.DARK_GRAY + "writing log data...");
 
         try{
             for(String folder_name : folders){

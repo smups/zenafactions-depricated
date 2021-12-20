@@ -9,13 +9,13 @@ import ZenaCraft.objects.Faction;
 
 public class CreateWarp extends TemplateCommand{
 
-    public CreateWarp() {super(1);}
+    public CreateWarp() {super(1, true, 1);}
 
     @Override
     protected boolean run() {
         Faction faction = App.factionIOstuff.getPlayerFaction(player);
 
-        if(faction.getPlayerRank(player) > 1) return invalidRank(player, 1);
+        if(hasPerm(player)) return invalidRank(player);
 
         double createCost = App.getPlugin(App.class).getConfig().getDouble("warpCreationCost");
         double warpScale = App.getPlugin(App.class).getConfig().getDouble("warpScale");
@@ -37,7 +37,7 @@ public class CreateWarp extends TemplateCommand{
 
         if (faction.getID() !=0 ) faction.removeBalance(createCost);
 
-        faction.addWarp(player.getLocation(), args[0]);
+        faction.addWarp(player.getLocation(), args[0], player);
         player.sendMessage(App.zenfac + ChatColor.GREEN + "Warp created!");
         player.setMetadata("createWarp", new FixedMetadataValue(App.getPlugin(App.class), false));
     

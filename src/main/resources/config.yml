@@ -7,6 +7,11 @@ Modify mob xp drops: true #use rebalanced mob xp drops?
 influence per player: 50.0 #how much infuence does a faction gain from a new player?
 Claim Influence Cost: 1.0 #how much influence does claiming a chunk cost?
 
+#Rank names
+Default Rank name lvl1: Founder #default name for highest rank
+Default Rank name lvl2: Bigshot #default name for 2nd highest rank
+Default Rank name lvl3: Member  #default name for 3rd highest rank
+
 #Economy Settings
 Currency Symbol: Ƒ #currency symbol used by plugin. (in case you're wondering, the default is the symbol for the old Dutch Guldier :) )
 faction creation cost: 3000.0 #how much money does creating a faction cost?

@@ -262,3 +262,47 @@ bugfixes:
 - fixed bug with loan timer crashing if loans expire while player offline
 - improved compatibility (known issues with TheNewEconomy): jar now includes shaded dependencies, resolving duplicate dependency conflicts
 - solved issue with certain dependencies straight up missing from the last jar file
+
+0.1.15.1
+features:
+- completely reworked faction ranks 
+- ranks are now more flexible: players can remove or add ranks at will
+- ranks are now customizable: players can edit rank permissions at will
+- added module to convert legacy faction and warp data to new permission system
+- overhauled warp permission system. Permissions for individual warps can now be set
+
+bugfixes:
+- added download link to update message thingy
+- fixed bug with update message and logging timer only running once
+- reworked plugin startup routine
+- made listing commands look nicer by adding newlines
+
+command changes:
+- removed demote command
+- removed promote command
+- removed changeRankNames command
+- removed setWarpRequirement command
++ added createrank command
++ added removerank command
++ added changerank command
++ added makewarpprivate command
++ added allowwarp command
++ added listperms command
+
+0.1.15.2
+bugfixes:
+- fixed a bug with the version checker (again)
+
+0.1.15.3
+features:
+- during startup all running timers get offset by a random amount, reducing lag due to all timers fireing at the same time
+- players can now add permissions to a rank
+- players can now remove permissions from a rank
+- added code to automatically add new permissions to the first 3 ranks of a faction
+
+command changes:
++ added /addrankperm command
++ added /removerankperm command
+
+bugfixes:
+- fixed bug while loading factions with the new perm system (post 0.1.15)
