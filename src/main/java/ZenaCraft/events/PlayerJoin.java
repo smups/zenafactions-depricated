@@ -1,6 +1,5 @@
 package ZenaCraft.events;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -30,27 +29,32 @@ public class PlayerJoin implements Listener{
     void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
         Plugin plugin = App.getPlugin(App.class);
-        Double player_influence = plugin.getConfig().getDouble("influence per player");
+        
+        //Check of player faction metadata heeft
+        if (!player.hasMetadata("factionID")){
 
-        if (!player.hasMetadata("faction")){
-            //Check of player faction metadata heeft
-            if (!App.playerHashMap.containsKey(player.getUniqueId())){
-                //Check of player in de database staat, -> voeg toe
-                App.playerHashMap.put(player.getUniqueId(), "default");
-                player.setMetadata("faction", new FixedMetadataValue(plugin, "default"));   
+            //Check if player has _ever_ played on the server
+            //If not, add them to the default faction
+            if (!App.factionIOstuff.isKnownPlayer(player)){
+
+                //Add player to default faction with lowest rank
+                //and give him some metadata
+                Faction defaultFaction = App.factionIOstuff.getFaction(0);
+                int rank = 3;
+                if (player.isOp()) rank = 0;
+                App.factionIOstuff.addPlayerToFaction(defaultFaction, player, rank);
+                player.setMetadata("faction", new FixedMetadataValue(plugin, defaultFaction.getName()));
+                player.setMetadata("factionID", new FixedMetadataValue(plugin, defaultFaction.getID()));   
                 
-                Faction faction = (Faction) App.factionHashMap.get("default");
-                faction.addMember(player.getUniqueId(), 3);
-                faction.setInfluence(faction.getInfluence() + player_influence);
-                player.setMetadata("factionID", new FixedMetadataValue(plugin, faction.getID())); 
-                event.getPlayer().sendMessage(App.zenfac + ChatColor.DARK_RED + "You've been added to the international faction!");
+                event.getPlayer().sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the international faction!");
             }
             else{
-                String faction = App.playerHashMap.get(player.getUniqueId());
-                int factionID = App.factionHashMap.get(faction).getID();
-                player.setMetadata("faction", new FixedMetadataValue(plugin, faction));
-                player.setMetadata("factionID", new FixedMetadataValue(plugin, factionID));
-                event.setJoinMessage(App.zenfac + "(" + faction + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
+                //Now for the returning player
+                Faction faction = App.factionIOstuff.getPlayerFaction(player);
+            
+                player.setMetadata("faction", new FixedMetadataValue(plugin, faction.getName()));
+                player.setMetadata("factionID", new FixedMetadataValue(plugin, faction.getID()));                
+                event.setJoinMessage(App.zenfac + "(" + faction.getPrefix() + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
             }
         }
         else{
@@ -71,7 +75,7 @@ public class PlayerJoin implements Listener{
         }
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        for (Map.Entry mapElement : App.factionHashMap.entrySet()){
+        for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
             Faction value = (Faction) mapElement.getValue();
             Score score = objective.getScore(value.getPrefix());
             score.setScore( (int) value.getInfluence());
@@ -80,39 +84,11 @@ public class PlayerJoin implements Listener{
         player.setScoreboard(board);
 
         //here comes the chunk stuff
-        loadFQChunks(player);
-    }
+        App.factionIOstuff.loadFQC(player, null);
 
-    private void loadFQChunks(Player player){
-        Location location = player.getLocation();
-        double[] borderLocs = new double[] {0, 1600, -1600};
-
-        for (double offsetX : borderLocs){
-            for (double offsetZ : borderLocs){
-
-                double[] playerLoc = new double[2];
-                playerLoc[0] = location.getX() + offsetX;
-                playerLoc[1] = location.getZ() + offsetZ;
-        
-                int[] chunkLoc = new int[2];
-                chunkLoc[0] = location.getChunk().getX() + (int) offsetX/16;
-                chunkLoc[1] = location.getChunk().getZ() + (int) offsetZ/16;
-        
-                String fQchunkName = "";
-        
-                int fQx = chunkLoc[0]/100;
-                int fQz = chunkLoc[1]/100;
-        
-                fQchunkName += ("X" + String.valueOf(fQx));
-                fQchunkName += ("Z" + String.valueOf(fQz));
-        
-                if(!App.loadedFQChunks.containsKey(fQchunkName)){
-                    App.loadedFQChunks.put(fQchunkName, new FactionQChunk(fQchunkName, player, playerLoc));
-                }
-                else{
-                    App.loadedFQChunks.get(fQchunkName).addOnlinePlayer(player);
-                }
-            }
+        //setAutoclaimingMetadata
+        if (!player.hasMetadata("autoClaiming")){
+            player.setMetadata("autoClaiming", new FixedMetadataValue(plugin, false));
         }
     }
 }

@@ -19,7 +19,7 @@ public class listLoadedFQChunks implements CommandExecutor{
         Player player = (Player) sender;
         String response = App.zenfac + "Loaded FQC's: ";
 
-        for (Map.Entry mapElement : App.loadedFQChunks.entrySet()){
+        for (Map.Entry mapElement : App.factionIOstuff.getLoadedFQChunks().entrySet()){
             String key = (String) mapElement.getKey();
             response += (key + ", ");
         }

@@ -39,5 +39,8 @@ ZenaFactions Plugin Changelog
 -added title popUp when moving into new terretory
 -fixed a whole load of bugs
 
-0.1.6
+0.1.5.2
+Lines of code: 1369
 -added dynmap support for faction terretory
+-rework of chunk claiming function
+-had to rework EVERY SINGLE FILE

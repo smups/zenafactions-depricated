@@ -18,12 +18,12 @@ public class factionBalance implements CommandExecutor {
         }
         Player player = (Player) sender;
 
-        String factionString = player.getMetadata("faction").get(0).asString();
-        if (!(App.factionHashMap.containsKey(factionString))){
-            player.sendMessage(App.zenfac + ChatColor.RED + "Error: no faction assigned to payer" + factionString);
+        int factionID = player.getMetadata("factionID").get(0).asInt();
+        if (!(App.factionIOstuff.getFactionList().containsKey(factionID))){
+            player.sendMessage(App.zenfac + ChatColor.RED + "Error: no faction assigned to player");
             return true;
         }
-        Faction faction = (Faction) App.factionHashMap.get(factionString);
+        Faction faction = (Faction) App.factionIOstuff.getFaction(factionID);
         String balance = String.valueOf(faction.getBalance());
         player.sendMessage(App.zenfac + ChatColor.WHITE + faction.getName() + " has: $" + balance);
         return true;

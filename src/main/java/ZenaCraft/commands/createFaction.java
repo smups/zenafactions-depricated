@@ -1,6 +1,7 @@
 package ZenaCraft.commands;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -36,10 +37,14 @@ public class createFaction implements CommandExecutor{
         Player player = (Player) sender;
         String name = args[0];
 
-        if (App.factionHashMap.containsKey(name)){
-            player.sendMessage(App.zenfac + ChatColor.DARK_RED + "Faction Already exists!");
-            return true;
+        for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
+            Faction f = (Faction) mEntry.getValue();
+            if (f.getName() == name){
+                player.sendMessage(App.zenfac + ChatColor.DARK_RED + "Faction Already exists!");
+                return true;
+            }
         }
+
         if (econ.getBalance(player) < faction_cost){
             sender.sendMessage(App.zenfac + ChatColor.DARK_RED + "You don't have enough money to make a faction!");
             return true;
@@ -49,19 +54,19 @@ public class createFaction implements CommandExecutor{
         founder.put(player.getUniqueId(), 0);
         String[] defaultRanks = {"Founder", "Bigshot", "Member"};
         String prefix = new String(name);
-        int newID = (int) App.factionHashMap.size();
+        int newID = (int) App.factionIOstuff.getFactionList().size();
         Faction newFaction = new Faction(name, defaultRanks, faction_cost, founder, prefix, newID);
 
-        String oldFactionString = player.getMetadata("faction").get(0).asString();
-        Faction oldFaction = (Faction) App.factionHashMap.get(oldFactionString);
+        int oldID = player.getMetadata("factionID").get(0).asInt();
+        Faction oldFaction = (Faction) App.factionIOstuff.getFaction(oldID);
 
         newFaction.setInfluence(player_influence);
         oldFaction.setInfluence(oldFaction.getInfluence() - player_influence);
 
         oldFaction.removeMember(player.getUniqueId());
 
-        App.factionHashMap.put(name, newFaction);
-        App.playerHashMap.replace(player.getUniqueId(), name);
+        App.factionIOstuff.addFaction(newFaction);
+        App.factionIOstuff.getKnownPlayers().replace(player.getUniqueId(), oldID);
 
         //scoreboard stuff
         ScoreboardManager manager = Bukkit.getScoreboardManager();

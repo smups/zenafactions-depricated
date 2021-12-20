@@ -5,33 +5,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapAPI;
+import org.dynmap.markers.MarkerSet;
 
-import ZenaCraft.commands.claimChunk;
-import ZenaCraft.commands.createFaction;
-import ZenaCraft.commands.factionBalance;
-import ZenaCraft.commands.factionInfluence;
-import ZenaCraft.commands.listFactions;
-import ZenaCraft.commands.listLoadedFQChunks;
-import ZenaCraft.commands.saveDB;
-import ZenaCraft.commands.setPrefix;
-import ZenaCraft.events.PlayerJoin;
-import ZenaCraft.events.PlayerLeave;
-import ZenaCraft.events.PlayerMove;
-import ZenaCraft.objects.Faction;
-import ZenaCraft.objects.FactionQChunk;
+import ZenaCraft.commands.*;
+import ZenaCraft.events.*;
+import ZenaCraft.threads.*;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 
@@ -44,13 +27,17 @@ public final class App extends JavaPlugin
     public static String player_db = "plugins/ZenaFactions/dat/players.ser";
     public static String faction_db = "plugins/ZenaFactions/dat/factions.ser";
     public static String FQChunk_db = "plugins/ZenaFactions/dat/";
-    public static HashMap<String, Faction> factionHashMap = new HashMap<String, Faction>();
-    public static HashMap<UUID, String> playerHashMap = new HashMap<UUID, String>();
-    public static HashMap<String, FactionQChunk> loadedFQChunks= new HashMap<String, FactionQChunk>();
+
+    public static FactionIOstuff factionIOstuff;
 
     private static Economy econ = null;
     private static Permission perms = null;
     private static Chat chat = null;
+
+    private static DynmapAPI dapi = null;
+    private static MarkerSet markerSet = null;
+
+    String default_fname = getConfig().getString("default faction name");
 
     @Override
     public void onEnable(){
@@ -61,7 +48,7 @@ public final class App extends JavaPlugin
         saveDefaultConfig();
 
         //intiate db
-        initDB();
+        factionIOstuff = new FactionIOstuff(player_db, faction_db, zenfac, FQChunk_db);
 
         //Hook into Vault
         if (!setupEconomy()){
@@ -87,141 +74,22 @@ public final class App extends JavaPlugin
         getCommand("setPrefix").setExecutor(new setPrefix());
         getCommand("listLoadedFQChunks").setExecutor(new listLoadedFQChunks());
         getCommand("claimChunk").setExecutor(new claimChunk());
+        getCommand("toggleAutoClaim").setExecutor(new toggleAutoClaim());
+
+        //Hook into Dynmap
+        if (!setupMap()){
+            getLogger().severe("Plugin disabled, no dynmap dependency found!");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
     }
 
     @Override
     public void onDisable(){
         //save factiondb
-        saveDB();
+        factionIOstuff.saveDB();
         
         getLogger().info(zenfac + "Byeee");
-    }
-
-    private void initDB(){
-        getLogger().info("Starting database init...");
-
-        String[] folders = new String[] {"plugins/ZenaFactions/dat", FQChunk_db + "Q1", FQChunk_db + "Q2", FQChunk_db + "Q3", FQChunk_db + "Q4"};
-
-        for (String folder_name : folders){
-            File dat = new File(folder_name);
-
-            if(!dat.exists()){
-                dat.mkdirs();
-                getLogger().info(zenfac + "No "+ folder_name +" folder found. Making one...");
-            }
-        }
-
-        File players = new File(player_db);
-
-        if (!players.exists()){
-            try{
-                FileOutputStream file = new FileOutputStream(player_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                HashMap<UUID, String> player_factions = new HashMap<UUID, String>();
-                out.writeObject(player_factions);
-                out.close();
-                file.close();
-                getLogger().info(zenfac + "Created player data");
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
-        }
-        else{
-            try{
-                getLogger().info(zenfac + "Loading player data...");
-                FileInputStream file = new FileInputStream(player_db);
-                ObjectInputStream in = new ObjectInputStream(file);
-                playerHashMap = (HashMap<UUID, String>) in.readObject();
-                in.close();
-                file.close();
-
-                for (Map.Entry mapElement : factionHashMap.entrySet()){
-                    String value = (String) mapElement.getValue();
-                    getLogger().info("Found Player: " + value);
-                }
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
-            catch(ClassNotFoundException c){
-                c.printStackTrace();
-            }
-        }
-
-        File factions = new File(faction_db);
-
-        if (!factions.exists()){
-            try{
-                FileOutputStream file = new FileOutputStream(faction_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                HashMap<String, Faction> player_factions = new HashMap<String, Faction>();
-
-                HashMap<UUID, Integer> dummyHashMap = new HashMap<UUID, Integer>();
-                String[] defaultRanks = {"Admin", "Staff", "New Player"};
-                Faction defaultFaction = new Faction("default", defaultRanks, 0.0, dummyHashMap, ChatColor.AQUA + "Int", 0);
-
-                player_factions.put("default", defaultFaction);
-                factionHashMap.put("default", defaultFaction);
-
-                out.writeObject(player_factions);
-                out.close();
-                file.close();
-                getLogger().info(zenfac + "Created faction data");
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
-            
-        }
-        else{
-            try{
-                getLogger().info(zenfac + "Loading faction data...");
-                FileInputStream file = new FileInputStream(faction_db);
-                ObjectInputStream in = new ObjectInputStream(file);
-                factionHashMap = (HashMap<String, Faction>) in.readObject();
-                in.close();
-                file.close();
-
-                for (Map.Entry mapElement : factionHashMap.entrySet()){
-                    String key = (String) mapElement.getKey();
-                    getLogger().info("Found Faction: " + key);
-                }
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
-            catch(ClassNotFoundException c){
-                c.printStackTrace();
-            }
-        }        
-        getLogger().info(zenfac + "Database init finished!");
-    }
-
-    private void saveDB(){
-        try{
-            FileOutputStream file = new FileOutputStream(faction_db);
-            ObjectOutputStream out = new ObjectOutputStream(file);
-            out.writeObject(factionHashMap);
-            out.close();
-            file.close();
-            getLogger().info(zenfac + "Saved faction data");
-        }
-        catch (IOException i){
-            i.printStackTrace();
-        }
-
-        try{
-            FileOutputStream file = new FileOutputStream(player_db);
-            ObjectOutputStream out = new ObjectOutputStream(file);
-            out.writeObject(playerHashMap);
-            out.close();
-            file.close();
-            getLogger().info(zenfac + "Saved player data");
-        }
-        catch (IOException i){
-            i.printStackTrace();
-        }
     }
 
     private boolean setupEconomy(){
@@ -266,5 +134,26 @@ public final class App extends JavaPlugin
 
     public static Chat getChat() {
         return chat;
+    }
+
+    private boolean setupMap(){
+        //no dynmap installed
+        if (Bukkit.getPluginManager().getPlugin("dynmap") == null) return false;
+        dapi = (DynmapAPI) Bukkit.getPluginManager().getPlugin("dynmap");
+        if (dapi.getMarkerAPI().getMarkerSet("ZenaFactions.Factions.Territory") == null){
+            markerSet = dapi.getMarkerAPI().createMarkerSet("ZenaFactions.Factions.Territory", "ZenaFactions", null, true);
+        }
+        else{
+            markerSet = dapi.getMarkerAPI().getMarkerSet("ZenaFactions.Factions.Territory");
+        }
+        return true;
+    }
+
+    public static DynmapAPI getDynmapAPI(){
+        return dapi;
+    }
+
+    public static MarkerSet getMarkerSet(){
+        return markerSet;
     }
 }

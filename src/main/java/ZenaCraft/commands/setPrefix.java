@@ -20,8 +20,9 @@ public class setPrefix implements CommandExecutor{
         String name = args[0];
         String color = (String) args[1];
 
-        String factionString = player.getMetadata("faction").get(0).asString();
-        Faction faction = (Faction) App.factionHashMap.get(factionString);
+        int factionID = player.getMetadata("factionID").get(0).asInt();
+        Faction faction = (Faction) App.factionIOstuff.getFaction(factionID);
+
         if (faction.getMembers().get(player.getUniqueId()) != 0){
             player.sendMessage(App.zenfac + ChatColor.DARK_RED + "You're not the owner of this faction!");
             return true;

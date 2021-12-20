@@ -20,11 +20,10 @@ public class listFactions implements CommandExecutor{
         Player player = (Player) sender;
         String response = App.zenfac + "Current factions: ";
 
-        for (Map.Entry mapElement : App.factionHashMap.entrySet()){
-            String key = (String) mapElement.getKey();
+        for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
             Faction value = (Faction) mapElement.getValue();
             int number = value.getMembers().size();
-            response += (key + " (" + String.valueOf(number) + "), ");
+            response += (value.getPrefix() + " (" + String.valueOf(number) + "), ");
         }
         player.sendMessage(response);
         return true;
