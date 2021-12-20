@@ -42,6 +42,11 @@ public class FactionQChunk implements Serializable{
         return true;
     }
 
+    @Override
+    public int hashCode(){
+        return uuid.hashCode();
+    }
+
     private synchronized void getFQChunkData(String name, double[] pos){
         String fileLoc = new String(App.FQChunk_db);
         if (pos[0] > 0 && pos[1] > 0) fileLoc += "Q1/";

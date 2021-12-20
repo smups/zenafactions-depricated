@@ -25,7 +25,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
-import ZenaCraft.commands.factionBalance;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.War;
 import ZenaCraft.objects.pChunk;

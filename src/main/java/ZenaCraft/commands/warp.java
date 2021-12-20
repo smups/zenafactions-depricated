@@ -1,5 +1,6 @@
 package ZenaCraft.commands;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,10 +26,11 @@ public class warp implements CommandExecutor{
         for(Warp w : f.getWarpList()){
             if(w.getName().equals(args[0])){
                 f.getWarp(args[0]).warpPlayer(player);
-                break;
+                return true;
             }
         }
 
+        player.sendMessage(App.zenfac + ChatColor.RED + "No such warp exists!");
         return true;
     }
 }

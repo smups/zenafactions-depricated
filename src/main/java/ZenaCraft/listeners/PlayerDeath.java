@@ -23,6 +23,9 @@ public class PlayerDeath implements Listener{
         double deathCost = plugin.getConfig().getDouble("deathCost");
         deathCost = deathCost*dead.getLevel();
 
+        //unload de FQC's van de dode boi
+        App.factionIOstuff.unLoadFQC(dead, dead.getLocation());
+
         if (dead.getKiller() != null){
             Player killer = (Player) dead.getKiller();
 
@@ -53,6 +56,6 @@ public class PlayerDeath implements Listener{
         }
         econ.withdrawPlayer(dead, deathCost);
         dead.sendMessage(App.zenfac + "you lost " + ChatColor.RED + "Ƒ" + String.valueOf(deathCost) + ChatColor.AQUA + " from dying!");
-        dead.playSound(dead.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, 1f, 1f);        
+        dead.playSound(dead.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, 1f, 1f);
     }    
 }

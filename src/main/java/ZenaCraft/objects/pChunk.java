@@ -30,6 +30,15 @@ public class pChunk implements Serializable{
         return location.equals(pc.getLocation());
     }
 
+    @Override
+    public int hashCode(){
+        int rt = 1;
+        rt *= (int) (5*chunkX);
+        rt *= (int) (7*chunkZ);
+        rt += (int) chunkWorld.hashCode();
+        return rt;
+    }
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
         //first do the deserelisation
         in.defaultReadObject();

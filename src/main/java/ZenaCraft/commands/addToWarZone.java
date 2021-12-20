@@ -11,7 +11,7 @@ import org.bukkit.plugin.Plugin;
 import ZenaCraft.App;
 import ZenaCraft.objects.War;
 
-public class addToWarZone implements CommandExecutor{
+public class AddToWarZone implements CommandExecutor{
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){

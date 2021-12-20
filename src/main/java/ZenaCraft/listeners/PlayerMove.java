@@ -25,11 +25,28 @@ public class PlayerMove implements Listener{
         Chunk newChunk = newLocation.getChunk();
         Chunk oldChunk = oldLocation.getChunk();
 
+        //stop als player niet in overworld is
+        if (!oldLocation.getWorld().getEnvironment().equals(World.Environment.NORMAL) && 
+            !newLocation.getWorld().getEnvironment().equals(World.Environment.NORMAL)) return;
+        //als de player van de overworld naar de nether/end gaat, moeten alle FQC's verwijderd worden
+        else if (oldLocation.getWorld().getEnvironment().equals(World.Environment.NORMAL) &&
+            !newLocation.getWorld().getEnvironment().equals(World.Environment.NORMAL))
+        {
+            App.factionIOstuff.unLoadFQC(player, oldLocation);
+            return;
+        }
+        //als de player van de nether/end naar de overworld gaat, moeten er juist FQC's geladen worden!
+        else if (newLocation.getWorld().getEnvironment().equals(World.Environment.NORMAL) &&
+            !oldLocation.getWorld().getEnvironment().equals(World.Environment.NORMAL))
+        {
+            App.factionIOstuff.loadFQC(player, newLocation);
+            return;
+        }
+
+        //Nu de code voor wanneer de speler beweegt in de overworld
+
         //Check of de player naar een nieuwe chunk is gelopen
         if (oldChunk.getX() != newChunk.getX() || oldChunk.getZ() != newChunk.getZ()){
-
-            //stop als player niet in overworld is
-            if (!player.getWorld().getEnvironment().equals(World.Environment.NORMAL)) return;
 
             String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
             String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);

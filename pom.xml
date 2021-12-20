@@ -6,7 +6,7 @@
 
   <groupId>ZenaCraft</groupId>
   <artifactId>ZenaFactions</artifactId>
-  <version>0.1.11.1-SNAPSHOT</version>
+  <version>0.1.11.3-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.destroystokyo.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.16.4-R0.1-SNAPSHOT</version>
+      <version>1.16.5-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
@@ -81,7 +81,14 @@
 	    <artifactId>GriefPrevention</artifactId>
       <version>16.17.0</version>
       <scope>provided</scope>
-	</dependency>
+  </dependency>
+
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-math3</artifactId>
+    <version>3.6.1</version>
+  </dependency>
+
   </dependencies>
 
   <build>

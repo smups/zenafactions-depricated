@@ -166,3 +166,13 @@ o ModifyClaim.java
 0.1.11.1
 - bugfixes
 - neutral warps are free
+
+0.1.11.2
+- removed pvp music (it was very annoying)
+- fixed bug with joinfaction command
+- fixed bugs with FQC's and nether portals
+- fixed bugs with FQC's and death
+
+0.1.11.3
+- finished warps (for now)
+- more bugfixes

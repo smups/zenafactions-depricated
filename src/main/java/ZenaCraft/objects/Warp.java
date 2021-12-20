@@ -3,9 +3,8 @@ package ZenaCraft.objects;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -56,10 +55,15 @@ public class Warp implements Serializable{
         return name.equals(w.getName());
     }
 
+    @Override
+    public int hashCode(){
+        return name.hashCode();
+    }
+
     public void warpPlayer(Player player){
         Economy econ = App.getEconomy();
-        double wc = App.getPlugin(App.class).getConfig().getDouble("warpCost");
-        double warpcost = wc*player.getLocation().distance(loc)*(1 + factionTax);
+
+        double warpcost = calcWarpCost(player);
 
         if (econ.getBalance(player) < warpcost){
             player.sendMessage(App.zenfac + ChatColor.RED + "You don't have enough money to warp here!");
@@ -77,8 +81,9 @@ public class Warp implements Serializable{
         }
 
         if (!player.hasMetadata("warpPlayer") || !player.getMetadata("warpPlayer").get(0).asBoolean()){
+            DecimalFormat df = new DecimalFormat("0.00");
             player.sendMessage(App.zenfac + ChatColor.WHITE + "are you sure you want to warp to " + ChatColor.AQUA + name +
-            ChatColor.WHITE + "? This costs " + ChatColor.GOLD + "Ƒ" + String.valueOf(Math.round(warpcost*100)/100) + ChatColor.RESET +
+            ChatColor.WHITE + "? This costs " + ChatColor.GOLD + "Ƒ" + df.format(warpcost) + ChatColor.RESET +
             ". Retype this command to confirm!");
             player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), true));
             return;
@@ -99,6 +104,14 @@ public class Warp implements Serializable{
         player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), false));
     }
 
+    public double calcWarpCost(Player p){
+        double wc = App.getPlugin(App.class).getConfig().getDouble("warpCost");
+        double warpcost;
+        if (p.getWorld().equals(loc.getWorld())) warpcost = wc*p.getLocation().distance(loc)*(1 + factionTax);
+        else warpcost = wc*p.getLocation().distance(new Location(p.getWorld(), 0, 100, 0))*(1 + factionTax);
+        return warpcost;
+    }
+
     //getters en setters
     public String getName(){
         return this.name;
@@ -111,5 +124,8 @@ public class Warp implements Serializable{
     }
     public void setWarpCost(double warpcost){
         this.factionTax = warpcost;
+    }
+    public int getRankReq(){
+        return this.rankReq;
     }
 }

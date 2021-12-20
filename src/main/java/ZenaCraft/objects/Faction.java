@@ -3,7 +3,9 @@ package ZenaCraft.objects;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Location;
@@ -33,6 +35,7 @@ public class Faction implements Serializable{
         influence = 0;
         ID = newID;
         color = newColor;
+        warps = new HashMap<String,Warp>();
     }
 
     /*
@@ -49,6 +52,11 @@ public class Faction implements Serializable{
         if (name != faction.name) return false;
         if (ID != faction.getID()) return false;
         return true;
+    }
+
+    @Override
+    public int hashCode(){
+        return this.getID();
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
@@ -125,8 +133,8 @@ public class Faction implements Serializable{
         this.color = newColor;
     }
     //warpstuff
-    public Warp[] getWarpList(){
-        return (Warp[]) this.warps.values().toArray();
+    public List<Warp> getWarpList(){
+        return new ArrayList<Warp>(warps.values());
     }
     public Warp getWarp(String name){
         return warps.get(name);

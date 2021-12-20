@@ -32,11 +32,10 @@ public class createWarp implements CommandExecutor{
 
         double createCost = App.getPlugin(App.class).getConfig().getDouble("warpCreationCost");
         double warpScale = App.getPlugin(App.class).getConfig().getDouble("warpScale");
-        createCost = createCost*Math.pow(faction.getWarpList().length, warpScale);
+        createCost = createCost*Math.pow(faction.getWarpList().size(), warpScale);
 
         if ((faction.getBalance() < createCost) && (faction.getID() != -1)){
             player.sendMessage(App.zenfac + ChatColor.RED + "Your faction doesn't have enough money to create a warp!");
-            player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), false));
             return true;
         }
 
@@ -47,15 +46,16 @@ public class createWarp implements CommandExecutor{
 
         if (!player.hasMetadata("createWarp") || !player.getMetadata("createWarp").get(0).asBoolean()){
             player.sendMessage(App.zenfac + ChatColor.WHITE + "are you sure you want to create a new warp?" +
-            " This costs " + ChatColor.GOLD + "Ƒ" + String.valueOf(Math.round(createCost*100)/100) + ChatColor.RESET +
+            " This costs " + ChatColor.GOLD + "Ƒ" + String.valueOf((double) Math.round(createCost*100.0)/100.0) + ChatColor.RESET +
             ". Retype this command to confirm!");
-            player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), true));
+            player.setMetadata("createWarp", new FixedMetadataValue(App.getPlugin(App.class), true));
             return true;
         }
 
         faction.removeBalance(createCost);
         faction.addWarp(player.getLocation(), args[0]);
         player.sendMessage(App.zenfac + ChatColor.GREEN + "Warp created!");
+        player.setMetadata("createWarp", new FixedMetadataValue(App.getPlugin(App.class), false));
         return true;
     }
 }

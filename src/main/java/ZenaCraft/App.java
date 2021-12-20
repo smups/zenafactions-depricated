@@ -79,8 +79,9 @@ public final class App extends JavaPlugin
         pm.registerEvents(new mobDeath(), this);
         pm.registerEvents(new PlayerDeath(), this);
         pm.registerEvents(new ModifyClaim(), this);
-        pm.registerEvents(new PlayerDamage(), this);
+        //pm.registerEvents(new PlayerDamage(), this); pvp damage, very annyoing
         pm.registerEvents(new PlayerTeleport(), this);
+        pm.registerEvents(new Respawn(), this);
 
         //Commands
         getCommand("listFactions").setExecutor(new listFactions());
@@ -89,7 +90,7 @@ public final class App extends JavaPlugin
         getCommand("factionBalance").setExecutor(new factionBalance());
         getCommand("factionInfluence").setExecutor(new factionInfluence());
         getCommand("setPrefix").setExecutor(new setPrefix());
-        getCommand("listLoadedFQChunks").setExecutor(new listLoadedFQChunks());
+        getCommand("listLoadedFQChunks").setExecutor(new ListLoadedFQCs());
         getCommand("claimChunk").setExecutor(new claimChunk());
         getCommand("toggleAutoClaim").setExecutor(new toggleAutoClaim());
         getCommand("listMembers").setExecutor(new listMembers());
@@ -101,7 +102,7 @@ public final class App extends JavaPlugin
         getCommand("declarewar").setExecutor(new declarewar());
         getCommand("warscore").setExecutor(new warscore());
         getCommand("listwars").setExecutor(new listwars());
-        getCommand("addtowarzone").setExecutor(new addToWarZone());
+        getCommand("addtowarzone").setExecutor(new AddToWarZone());
         getCommand("createWarp").setExecutor(new createWarp());
         getCommand("warp").setExecutor(new warp());
 

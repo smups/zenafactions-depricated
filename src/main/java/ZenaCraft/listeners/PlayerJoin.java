@@ -1,6 +1,7 @@
 package ZenaCraft.listeners;
 
 import org.bukkit.ChatColor;
+import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,6 +39,7 @@ public class PlayerJoin implements Listener{
                 player.setMetadata("factionID", new FixedMetadataValue(plugin, defaultFaction.getID()));   
                 
                 event.getPlayer().sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the international faction!");
+
             }
             else{
                 //Now for the returning player
@@ -45,19 +47,21 @@ public class PlayerJoin implements Listener{
             
                 player.setMetadata("faction", new FixedMetadataValue(plugin, faction.getName()));
                 player.setMetadata("factionID", new FixedMetadataValue(plugin, faction.getID()));                
-                event.setJoinMessage(App.zenfac + "(" + faction.getPrefix() + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
+                event.setJoinMessage(App.zenfac + ChatColor.WHITE + "(" + faction.getPrefix() + ChatColor.WHITE + ") " +
+                    "Welcome back " + ChatColor.BOLD + player.getDisplayName());
             }
         }
         else{
             String faction = player.getMetadata("faction").get(0).asString();
-            event.setJoinMessage(App.zenfac + "(" + faction + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
+            event.setJoinMessage(App.zenfac + ChatColor.WHITE + "(" + faction + ChatColor.WHITE + ") " +
+            "Welcome back " + ChatColor.BOLD + player.getDisplayName());
         }
 
         //Here comes the Scoreboard stuff
         App.factionIOstuff.reloadScoreBoard(player);
 
-        //here comes the chunk stuff
-        App.factionIOstuff.loadFQC(player, null);
+        //here comes the FQC stuff
+        if(player.getWorld().getEnvironment().equals(Environment.NORMAL)) App.factionIOstuff.loadFQC(player, null);
 
         //setAutoclaimingMetadata
         if (!player.hasMetadata("autoClaiming")){

@@ -109,6 +109,11 @@ public class War implements Serializable{
         return true;
     }
 
+    @Override
+    public int hashCode(){
+        return id.hashCode();
+    }
+
     private void updateBBWarScore(){
         defBar.setProgress(1 - warScore);
         atBar.setProgress(warScore);
