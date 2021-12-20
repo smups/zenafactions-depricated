@@ -53,10 +53,10 @@ public class PerfCheckThread {
             }
         }
 
-        saveTimer = new Timer();
+        saveTimer = new Timer("saveTimer");
         saveTimer.schedule(new SaveDat(), 1000*(3600 + 5), 1000*3600);
         
-        sendTimer = new Timer();
+        sendTimer = new Timer("sendTimer");
 
         //Pick an offset anywhere from now to 1h, don't want people to play dirty :c
         int offset = (int) (Math.random()*3600);

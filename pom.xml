@@ -6,7 +6,7 @@
 
   <groupId>ZenaCraft</groupId>
   <artifactId>ZenaFactions</artifactId>
-  <version>0.1.16.2-BETA</version>
+  <version>0.1.17.1-BETA</version>
 
   <packaging>jar</packaging>
 
@@ -17,10 +17,12 @@
   </properties>
 
   <repositories>
+      <!--
       <repository>
           <id>spigot-repo</id>
           <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
       </repository>
+       -->
       <repository>
         <id>jitpack.io</id>
         <url>https://jitpack.io</url>
@@ -49,9 +51,9 @@
     -->
 
     <dependency>
-      <groupId>com.destroystokyo.paper</groupId>
+      <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.16.5-R0.1-SNAPSHOT</version>
+      <version>1.17.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 

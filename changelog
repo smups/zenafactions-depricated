@@ -344,3 +344,8 @@ bugfixes:
 -- release update of 0.1.16! --
 bugfixes:
 - fixed bug with loading legacy player data
+
+0.1.17.1
+features:
+- expanded logging report
+- updated to MC1.17.1

@@ -43,6 +43,8 @@ public class PerfReport{
 
     //ZF info
     final private String ZFVersion;
+    final private String ZFDynmapVersion;
+    final private String ZFDiscordVersion;
     final private int numFac;
     final private int numLoans;
     final private int numWars;
@@ -83,6 +85,12 @@ public class PerfReport{
 
         //get ZF info
         ZFVersion = App.getPlugin(App.class).getDescription().getVersion().trim();
+        Plugin ZFDynmap = Bukkit.getPluginManager().getPlugin("ZFDynmap");
+        if (ZFDynmap == null) ZFDynmapVersion = "not installed";
+        else ZFDynmapVersion = ZFDynmap.getDescription().getVersion().trim();
+        Plugin ZFDiscord = Bukkit.getPluginManager().getPlugin("ZFDiscord");
+        if (ZFDiscord == null) ZFDiscordVersion = "not installed";
+        else ZFDiscordVersion = ZFDiscord.getDescription().getVersion().trim();
         numFac = App.factionIOstuff.getFactionList().size();
         numLoans = App.factionIOstuff.calcNumLoans();
         numWars = App.warThread.getWars().size();
