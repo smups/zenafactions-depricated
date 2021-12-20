@@ -2,6 +2,15 @@ ZenaFactions Plugin Changelog
 
 0.1.1
 -Faction is now stored in player metadata
--Added seralized hasmap of player UUID (key) and Faction
 -Added PlayerJoin listener that initiates and updates metadata
 -Hashmap lookups in PlayerJoin are now multi-threaded
+-Added players database
+-Added seralized hashmap of player UUID (key) and Faction
+
+0.1.2
+-Added seralized hashmap of Faction_name (String) and Faction (object)
+-Added Faction database
+-Added listFactions command
+-Added createFaction command
+-Player Join no longer updates the database, now uses system RAM
+-Added savedb command

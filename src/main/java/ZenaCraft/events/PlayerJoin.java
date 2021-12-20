@@ -1,13 +1,5 @@
 package ZenaCraft.events;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.UUID;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,79 +19,23 @@ public class PlayerJoin implements Listener{
         Player player = event.getPlayer();
         Plugin plugin = App.getPlugin(App.class);
 
-        Hashing obj = new Hashing();
-        obj.event = event;
-        obj.player = player;
-        obj.plugin = plugin;
-
-        Thread tr = new Thread(obj);
-        tr.start();
-    }
-
-    private class Hashing implements Runnable{
-        Player player = null;
-        Plugin plugin = null;
-        PlayerJoinEvent event = null;
-        
-        public void run(){
-            if (!player.hasMetadata("faction")){
-                HashMap<UUID,String> player_hash = getPlayerHash(player);
-
-                if (!player_hash.containsKey(player.getUniqueId())){
-                    player_hash.put(player.getUniqueId(), "default");
-                    if (!player.hasMetadata("faction")){
-                        player.setMetadata("faction", new FixedMetadataValue(plugin, "default"));
-                    }
-                    updateHash(player_hash);            
-                    event.getPlayer().sendMessage(App.zenfac + ChatColor.DARK_RED + "You've been added to the international faction!");
-                }
-            
-                else{
-                    String faction = player_hash.get(player.getUniqueId());
-                    if (!player.hasMetadata("faction")){
-                        player.setMetadata("faction", new FixedMetadataValue(plugin, faction));
-                    }
-                    event.setJoinMessage(App.zenfac + "(" + faction + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
-                }
+        if (!player.hasMetadata("faction")){
+            //Check of player faction metadata heeft
+            if (!App.playerHashMap.containsKey(player.getUniqueId())){
+                //Check of player in de database staat, -> voeg toe
+                App.playerHashMap.put(player.getUniqueId(), "default");
+                player.setMetadata("faction", new FixedMetadataValue(plugin, "default"));       
+                event.getPlayer().sendMessage(App.zenfac + ChatColor.DARK_RED + "You've been added to the international faction!");
             }
             else{
-                String faction = player.getMetadata("faction").get(0).asString();
+                String faction = App.playerHashMap.get(player.getUniqueId());
+                player.setMetadata("faction", new FixedMetadataValue(plugin, faction));
                 event.setJoinMessage(App.zenfac + "(" + faction + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
             }
         }
-
-        private HashMap<UUID,String> getPlayerHash(Player player){
-            HashMap<UUID, String> players = null;
-            try{
-                FileInputStream file = new FileInputStream(App.player_db);
-                ObjectInputStream in = new ObjectInputStream(file);
-                players = (HashMap<UUID, String>) in.readObject();
-                in.close();
-                file.close();
-    
-                return players;
-            }
-            catch (IOException i) {
-                i.printStackTrace();
-                return players;
-            }
-            catch(ClassNotFoundException c){
-                c.printStackTrace();
-                return players;
-            }
-        }
-    
-        private void updateHash(HashMap<UUID,String> map){
-            try{
-                FileOutputStream file = new FileOutputStream(App.player_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                out.writeObject(map);
-                out.close();
-                file.close();
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
+        else{
+            String faction = player.getMetadata("faction").get(0).asString();
+            event.setJoinMessage(App.zenfac + "(" + faction + ") " + ChatColor.WHITE + "Welcome back " + ChatColor.BOLD + player.getDisplayName());
         }
     }
 }

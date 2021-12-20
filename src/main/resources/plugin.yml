@@ -1,3 +1,14 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1
+version: 0.1.2
+api-version: 1.16
+commands:
+  listFactions:
+    description: lists the current server factions
+    usage: /<command>
+  createFaction:
+    description: creates a new faction
+    usage: /<command> [faction name]
+  saveDB:
+    description: saves databases
+    usage: /<command>
