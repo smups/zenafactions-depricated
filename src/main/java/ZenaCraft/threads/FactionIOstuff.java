@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -103,18 +104,6 @@ public class FactionIOstuff {
         int rankInt = getPlayerFaction(player).getMembers().get(player.getUniqueId());
         return getPlayerFaction(player).getRanks()[rankInt];
     }
-    public void changePlayerFaction(Faction newFaction, Player player, int rank){
-        Faction oldFaction = getPlayerFaction(player);
-        double player_influence = plugin.getConfig().getDouble("influence per player");
-
-        oldFaction.removeMember(player.getUniqueId());
-        oldFaction.setInfluence(oldFaction.getInfluence() - player_influence);
-        newFaction.setInfluence(newFaction.getInfluence() + player_influence);
-        newFaction.addMember(player.getUniqueId(), rank);
-
-        addFaction(newFaction);
-        playerHashMap.replace(player.getUniqueId(), newFaction.getID());
-    }
 
     //Factions
     public void setFactionList(HashMap<Integer, Faction> FHM){
@@ -135,12 +124,40 @@ public class FactionIOstuff {
     public void addPlayerToFaction(Faction faction, Player player, int rank){
         faction.addMember(player.getUniqueId(), rank);
         faction.setInfluence(faction.getInfluence() + player_influence);
-        playerHashMap.put(player.getUniqueId(), faction.getID());
+        if (playerHashMap.containsKey(player.getUniqueId())) playerHashMap.replace(player.getUniqueId(), faction.getID());
+        else playerHashMap.put(player.getUniqueId(), faction.getID());
+
+        //Messages
+        for (Map.Entry mEntry : faction.getMembers().entrySet()){
+            try{
+                Player fmember = Bukkit.getPlayer((UUID) mEntry.getKey());
+                fmember.playSound(fmember.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+                fmember.sendMessage(zenfac + ChatColor.GREEN + player.getName() + " joined your faction!");
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        player.sendMessage(zenfac + ChatColor.GREEN + "Joined faction: " + faction.getPrefix());
     }
+    
     public void removePlayerFromFaction(Faction faction, Player player){
         faction.removeMember(player.getUniqueId());
         faction.setInfluence(faction.getInfluence() - player_influence);
         playerHashMap.remove(player.getUniqueId());
+
+        //Messages
+        for (Map.Entry mEntry : faction.getMembers().entrySet()){
+            Player fmember = Bukkit.getPlayer((UUID) mEntry.getKey());
+            fmember.playSound(fmember.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
+            fmember.sendMessage(zenfac + ChatColor.RED + player.getName() + " left your faction!");
+        }
+    }
+    public void changePlayerFaction(Faction newFaction, Player player, int rank){
+        removePlayerFromFaction(getPlayerFaction(player), player);
+        addPlayerToFaction(newFaction, player, rank);
     }
 
     // +++ Threading enzo +++
@@ -262,6 +279,7 @@ public class FactionIOstuff {
             byte playerFaction = player.getMetadata("factionID").get(0).asByte();
             if (factionHashMap.get((int) playerFaction).getMembers().get(player.getUniqueId()) > 1){
                 player.sendMessage(zenfac + ChatColor.RED + "You don't have to appropriate rank to do this! You have to be at least: " + ChatColor.GREEN + factionHashMap.get((int) playerFaction).getRanks()[1]);
+                return;
             }
 
             for (int i = -1*radius; i <= radius; i++){

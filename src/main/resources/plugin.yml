@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.7
+version: 0.1.8.1
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:

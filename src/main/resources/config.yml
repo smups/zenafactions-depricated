@@ -2,3 +2,4 @@ faction creation cost: 3000.0
 influence per player: 50.0
 default faction name: Capitol Faction
 Claim Influence Cost: 1.0
+deathCost: 3.0

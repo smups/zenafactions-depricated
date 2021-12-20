@@ -59,3 +59,15 @@ ZenaFactions Plugin Changelog
 -added listMembers, setInfluence and joinFaction commands
 -players may now join any faction as junior rank
 -changed some default values
+-added sounds and messages if player joins faction
+
+0.1.8
+-fixed some bugs with factionhashmap
+-added money gain/lost mechanics on player death
+-added money gain mechanics on mobdeath
+-check if GP claim is inside faction claim before allowing it
+
+0.1.8.1
+-fixed some minor bugs with /listMembers
+-changed currency symbol to Ƒ
+-now also checking modified GP claims

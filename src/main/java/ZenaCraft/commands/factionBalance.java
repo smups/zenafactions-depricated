@@ -25,7 +25,7 @@ public class factionBalance implements CommandExecutor {
         }
         Faction faction = (Faction) App.factionIOstuff.getFaction(factionID);
         String balance = String.valueOf(faction.getBalance());
-        player.sendMessage(App.zenfac + ChatColor.WHITE + faction.getName() + " has: $" + balance);
+        player.sendMessage(App.zenfac + faction.getPrefix() +  ChatColor.WHITE + " has:" + ChatColor.GREEN + "Ƒ" + balance);
         return true;
     }
 }

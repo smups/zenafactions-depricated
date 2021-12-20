@@ -31,7 +31,7 @@ public class PlayerMove implements Listener{
 
             //Check of de player naar een nieuwe FQC is gelopen
             if(!oldFQCName.equals(newFQCName)){
-                player.sendMessage("Moved from: " + oldFQCName + " to: " + newFQCName);
+                if (player.isOp()) player.sendMessage("Moved from: " + oldFQCName + " to: " + newFQCName);
                 //IOstuff + autoclaiming
                 MovedFQC movedFQC = new MovedFQC(player, oldLocation, newLocation);
                 autoClaimFunc(movedFQC.getThread(), player, newLocation);

@@ -73,6 +73,9 @@ public final class App extends JavaPlugin
         pm.registerEvents(new PlayerMove(), this);
         pm.registerEvents(new PlayerChat(), this);
         pm.registerEvents(new CreateClaim(), this);
+        pm.registerEvents(new mobDeath(), this);
+        pm.registerEvents(new PlayerDeath(), this);
+        pm.registerEvents(new ModifyClaim(), this);
 
         //Commands
         getCommand("listFactions").setExecutor(new listFactions());

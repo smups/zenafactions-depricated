@@ -6,7 +6,7 @@
 
   <groupId>ZenaCraft</groupId>
   <artifactId>ZenaFactions</artifactId>
-  <version>0.1.7-SNAPSHOT</version>
+  <version>0.1.8.1-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
@@ -25,6 +25,10 @@
         <id>jitpack.io</id>
         <url>https://jitpack.io</url>
       </repository>
+      <repository>
+        <id>papermc</id>
+        <url>https://papermc.io/repo/repository/maven-public/</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -35,9 +39,18 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- 
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
+      <version>1.16.4-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    -->
+
+    <dependency>
+      <groupId>com.destroystokyo.paper</groupId>
+      <artifactId>paper-api</artifactId>
       <version>1.16.4-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
