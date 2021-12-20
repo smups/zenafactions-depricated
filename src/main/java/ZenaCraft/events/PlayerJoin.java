@@ -68,6 +68,6 @@ public class PlayerJoin implements Listener{
         }
 
         //WarStuff
-        for (War war : App.warThread.getWars()) war.setPlayerBossbar(player);
+        for (War war : App.warThread.getWars()) war.setPlayerBossBar(player);
     }
 }

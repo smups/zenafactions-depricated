@@ -19,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
@@ -43,46 +44,30 @@ public class WarThread {
         new InitDB();
     }
 
-    private class SaveDB implements Runnable{
-        /*
-            Slaat war database op in een aparte thread.
-        */
-        private Thread t;
+    //Does the counting
+    private class TikTok extends TimerTask{
+        private War war;
 
-        public SaveDB(){
-            this.start();
+        public TikTok(War wwar){
+            war = wwar;
         }
 
-        public void start(){
-            if (t == null){
-                t = new Thread(this);
-                t.start();
-            }
-        }
-
+        @Override
         public void run(){
-            //save nu de hashmap
-            try{
-                //stop the timers
-                for (Timer t : tickingTimers) t.cancel();
+            if (war.getAge() == war.getDeathTime()) endwar(this);
+            if (war.getWarScore() > 0.999 || war.getWarScore() < 0.001) endwar(this);
+            war.setAge(war.getAge() + 1);
+            int remainsec = war.getDeathTime() - war.getAge();
+            String remainingTime = String.valueOf(remainsec/3600) + ":" + String.valueOf((remainsec/60)%60) + ":" +String.valueOf(remainsec%60);
+            war.setRemainingTimeString(remainingTime);          
+        }
 
-                FileOutputStream file = new FileOutputStream(war_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                out.writeObject(onGoingWars);
-                out.close();
-                file.close();
-                plugin.getLogger().info(zenfac + "Saved wars");
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
+        public War getWar(){
+            return this.war;
         }
     }
-    //method om deze thread te starten
-    public void saveDB(){
-        new SaveDB();
-    }
 
+    //Initialise the whole thing
     private class InitDB implements Runnable{
         private Thread t;
 
@@ -127,12 +112,11 @@ public class WarThread {
                     //get the clocks going
                     for (War war : onGoingWars){
                         Bukkit.getLogger().info(App.zenfac  + "Found war: " + war.getAttackers().getPrefix() + ChatColor.RESET + " against " + war.getDefenders().getPrefix());
-                        war.update();
-                        onGoingWars.add(war);
+                        setWarMetadata(war, true);
 
                         Timer t = new Timer();
                         t.schedule(new TikTok(war), 0, 1000);
-                        tickingTimers.add(t);                        
+                        tickingTimers.add(t);
                     }
                 }
                 catch (IOException i){
@@ -145,28 +129,44 @@ public class WarThread {
         }
     }
 
-    //Does the counting
-    private class TikTok extends TimerTask{
-        private UUID warID;
+    private class SaveDB implements Runnable{
+        /*
+            Slaat war database op in een aparte thread.
+        */
+        private Thread t;
 
-        public TikTok(War wwar){
-            warID = wwar.getID();
+        public SaveDB(){
+            this.start();
         }
 
-        @Override
+        public void start(){
+            if (t == null){
+                t = new Thread(this);
+                t.start();
+            }
+        }
+
         public void run(){
-            War war = getWar(warID);
-            if (war.getAge() == war.getDeathTime()) endwar(this);
-            if (war.getWarScore() > 0.99 || war.getWarScore() < 0.01) endwar(this);
-            war.setAge(war.getAge() + 1);
-            int remainsec = war.getDeathTime() - war.getAge();
-            String remainingTime = String.valueOf(remainsec/3600) + ":" + String.valueOf((remainsec/60)%60) + ":" +String.valueOf(remainsec%60);
-            war.setRemainingTimeString(remainingTime);          
-        }
+            //save nu de hashmap
+            try{
+                //stop the timers
+                for (Timer t : tickingTimers) t.cancel();
 
-        public UUID getWarID(){
-            return this.warID;
+                FileOutputStream file = new FileOutputStream(war_db);
+                ObjectOutputStream out = new ObjectOutputStream(file);
+                out.writeObject(onGoingWars);
+                out.close();
+                file.close();
+                plugin.getLogger().info(zenfac + "Saved wars");
+            }
+            catch (IOException i){
+                i.printStackTrace();
+            }
         }
+    }
+    //method om deze thread te starten
+    public void saveDB(){
+        new SaveDB();
     }
 
     //sadly, this has to happen asynchronously, since there are a lot of loops
@@ -193,24 +193,14 @@ public class WarThread {
         public void run(){
             War war = new War(defenders, attackers);
             addWarzone(war, firstChunk, attackers);
-
-            onGoingWars.add(war);
+            setWarMetadata(war, true);
+            
+            //timer stuff
             Timer t = new Timer();
             t.schedule(new TikTok(war), 0, 1000);
             tickingTimers.add(t);
 
-            for (Map.Entry mEntry : defenders.getMembers().entrySet()){
-                OfflinePlayer op = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
-                if (!op.isOnline()) continue;
-                Player p = (Player) op;
-                p.setMetadata("atWar", new FixedMetadataValue(plugin, true));
-            }
-            for (Map.Entry mEntry : attackers.getMembers().entrySet()){
-                OfflinePlayer op = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
-                if (!op.isOnline()) continue;
-                Player p = (Player) op;
-                p.setMetadata("atWar", new FixedMetadataValue(plugin, true));
-            }
+            onGoingWars.add(war);
         }
     }
     //ding dat deze thread start
@@ -222,12 +212,10 @@ public class WarThread {
         Thread t;
         War war;
         int finalscore;
-        TikTok tiktok;
 
         public EndWar(TikTok tt){
-            war = getWar(tt.getWarID());
-            finalscore = (int) war.getWarScore()*1000;
-            tiktok = tt; 
+            war = tt.getWar();
+            tt.cancel();
             this.start();
         }
 
@@ -239,12 +227,62 @@ public class WarThread {
         }
 
         public void run(){
-            tiktok.cancel();
+            finalscore = (int) war.getWarScore()*1000;
+            war.removeAllBossBar();
             onGoingWars.remove(war);
+
+            Faction victors = null;
+            Faction losers = null;
+
+            if (finalscore > 500){
+                victors = war.getAttackers();
+                losers = war.getDefenders();
+            }
+            else if (finalscore < 500){
+                victors = war.getDefenders();
+                losers = war.getAttackers();
+            }
+
+            if (victors != null) sendVictoryMessage(victors);
+            if (losers != null) sendDefeatMessage(losers);
         }
     }
     public void endwar(TikTok tt){
         new EndWar(tt);
+    }
+
+    private void sendVictoryMessage(Faction victors){
+        for (Map.Entry mEntry : victors.getMembers().entrySet()){
+            OfflinePlayer op = (OfflinePlayer) Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
+            if (!op.isOnline()) continue;
+            Player p = (Player) op;
+            p.playSound(p.getLocation(), Sound.MUSIC_DISC_CAT, 1f, 1f);
+            p.sendTitle(ChatColor.GREEN + "Victory!", "your faction gained territory", 10, 50, 20);
+        }
+    }
+    private void sendDefeatMessage(Faction losers){
+        for (Map.Entry mEntry : losers.getMembers().entrySet()){
+            OfflinePlayer op = (OfflinePlayer) Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
+            if (!op.isOnline()) continue;
+            Player p = (Player) op;
+            p.playSound(p.getLocation(), Sound.MUSIC_DISC_MELLOHI, 1f, 1f);
+            p.sendTitle(ChatColor.RED + "Defeat...", "your faction lost territory", 10, 50, 20);
+        }
+    }
+
+    public void setWarMetadata(War war, boolean atWar){
+        for (Map.Entry mEntry : war.getDefenders().getMembers().entrySet()){
+            OfflinePlayer op = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
+            if (!op.isOnline()) continue;
+            Player p = (Player) op;
+            p.setMetadata("atWar", new FixedMetadataValue(plugin, atWar));
+        }
+        for (Map.Entry mEntry : war.getAttackers().getMembers().entrySet()){
+            OfflinePlayer op = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
+            if (!op.isOnline()) continue;
+            Player p = (Player) op;
+            p.setMetadata("atWar", new FixedMetadataValue(plugin, atWar));
+        }
     }
 
     public void addWarzone(War war, Chunk chunk, Faction agressor){

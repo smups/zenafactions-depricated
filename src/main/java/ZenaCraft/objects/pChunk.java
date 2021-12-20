@@ -1,18 +1,25 @@
 package ZenaCraft.objects;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 public class pChunk implements Serializable{
     //versie van chunk die wel persistent is
-    static final long serialVersionUID = 42L;
+    static final long serialVersionUID = 100L;
     transient Chunk chunk;
-    
-    Location location;
+    transient Location location;
+
+    private double chunkX;
+    private double chunkZ;
+    private UUID chunkWorld;
 
     @Override
     public boolean equals(Object o){
@@ -23,12 +30,24 @@ public class pChunk implements Serializable{
         return location.equals(pc.getLocation());
     }
 
-    public pChunk(Chunk c){
-        chunk = c;
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+        //first do the deser
+        in.defaultReadObject();
+
+        //now do the special stuff
         update();
     }
 
-    public void update(){
+    public pChunk(Chunk c){
+        chunk = c;
+        chunkWorld = c.getWorld().getUID();
+        chunkX = (double) c.getX();
+        chunkZ = (double) c.getZ();
+        update();
+    }
+
+    private void update(){
+        if (location == null) location = new Location(Bukkit.getWorld(chunkWorld), chunkX, 0, chunkZ);
         if (chunk == null) chunk = location.getChunk();
     }
 

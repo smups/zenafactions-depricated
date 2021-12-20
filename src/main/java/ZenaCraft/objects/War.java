@@ -1,5 +1,7 @@
 package ZenaCraft.objects;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,75 +24,77 @@ import org.bukkit.plugin.Plugin;
 import ZenaCraft.App;
 
 public class War implements Serializable{
-    static final long serialVersionUID = 45L;
+    static final long serialVersionUID = 100L;
 
-    double warScore;
-    Faction defenders;
-    Faction attackers;
-    HashMap<pChunk,Integer> warzone = new HashMap<pChunk, Integer>();
-    int elapsedSeconds;
-    int endSecond;
-    UUID id;
-    String timeRemaining = "24:00:00";
+    //persisetent fields
+    private UUID id;
+    private double warScore;
+    private int elapsedSeconds;
+    private int endSecond;
+    private int attackersID;
+    private int defendersID;
+    private HashMap<pChunk,Integer> warzone = new HashMap<pChunk, Integer>(); 
 
     //transient fields
-    transient BossBar defBar;
-    transient BossBar atBar;
+    private transient BossBar defBar;
+    private transient BossBar atBar;
+    private transient Faction defenders;
+    private transient Faction attackers;
+    private transient String  timeRemaining;
 
     public War(Faction Defenders, Faction Attackers){
+
+        //set persistent variables
+        id = UUID.randomUUID();
+        attackersID = Attackers.getID();
+        defendersID = Defenders.getID();
         warScore = 0.5;
         elapsedSeconds = 0;
+        endSecond = (int) App.getPlugin(App.class).getConfig().getInt("warDuration (h)")*3600;
+
+        //set transient fields
         defenders = Defenders;
         attackers = Attackers;
-        
-        id = UUID.randomUUID();
-
-        //replace the pchunks with normal chunks
-        for (Map.Entry mEntry : warzone.entrySet()){
-            pChunk pc = (pChunk) mEntry.getKey();
-            pc.update();
-        }
-
-        endSecond = (int) App.getPlugin(App.class).getConfig().getInt("warDuration (h)")*3600;
 
         //bossbar things
         createBossBar();
         updateBBWarScore();
         updateBBTitle();
+    }
 
-        //add the bossbar to all players
+    //Method that is called upon deseralisation, sets the transient fields
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+        //first do the deser (load persistent fields)
+        in.defaultReadObject();
+        
+        //now handle the class specific stuff (load transient fields)
+        defenders = App.factionIOstuff.getFaction(defendersID);
+        attackers = App.factionIOstuff.getFaction(attackersID);
+
+        createBossBar();
+        updateBBWarScore();
+        updateBBTitle();
+    }
+
+    public void createBossBar(){
+        defBar = Bukkit.getServer().createBossBar("dummy", BarColor.WHITE, BarStyle.SEGMENTED_10);
+        atBar = Bukkit.getServer().createBossBar("dummy", BarColor.WHITE, BarStyle.SEGMENTED_10);
+
+        //add the new bossbar to all players
         for (Map.Entry mEntry : defenders.getMembers().entrySet()){
             OfflinePlayer op = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
             if (op.isOnline()){
                 Player p = (Player) op;
-                setPlayerBossbar(p);
+                setPlayerBossBar(p);
             }
         }
         for (Map.Entry mEntry : attackers.getMembers().entrySet()){
             OfflinePlayer op = Bukkit.getOfflinePlayer((UUID) mEntry.getKey());
             if (op.isOnline()){
                 Player p = (Player) op;
-                setPlayerBossbar(p);
+                setPlayerBossBar(p);
             }
         }
-    }
-
-    public void update(){
-        defenders = App.factionIOstuff.getFaction(defenders.getID());
-        attackers = App.factionIOstuff.getFaction(attackers.getID());
-
-        for (Map.Entry mEntry : warzone.entrySet()){
-            pChunk pc = (pChunk) mEntry.getKey();
-            pc.update();
-        }
-
-        createBossBar();
-    }
-
-    public void createBossBar(){
-        defBar = Bukkit.getServer().createBossBar("dummy", BarColor.WHITE, BarStyle.SEGMENTED_10);
-        atBar = Bukkit.getServer().createBossBar("dummy", BarColor.WHITE, BarStyle.SEGMENTED_10);
-        updateBBWarScore();
     }
     
     @Override
@@ -139,83 +143,102 @@ public class War implements Serializable{
     }
 
     //getters en setters
-    public synchronized Faction getAttackers(){
+    public Faction getAttackers(){
         return this.attackers;
     }
-    public synchronized Faction getDefenders(){
+    public Faction getDefenders(){
         return this.defenders;
     }
-    public synchronized String getRemainingTimeString(){
+
+    public String getRemainingTimeString(){
         return this.timeRemaining;
     }
-    public synchronized void setRemainingTimeString(String s){
+    public void setRemainingTimeString(String s){
         this.timeRemaining = s;
         updateBBTitle();
     }
-    public synchronized int getAge(){
+
+    public int getAge(){
         return this.elapsedSeconds;
     }
-    public synchronized void setAge(int newTime){
+    public void setAge(int newTime){
         elapsedSeconds = newTime;
     }
-    public synchronized int getDeathTime(){
+    public int getDeathTime(){
         return this.endSecond;
     }
-    public synchronized void addWarzoneChunk(Chunk wzChunk, int agressor){
+
+    public void addWarzoneChunk(Chunk wzChunk, int agressor){
         warzone.put(new pChunk(wzChunk), agressor);
     }
-    public synchronized void removeWarzoneChunk(Chunk wzChunk){
+    public void removeWarzoneChunk(Chunk wzChunk){
         warzone.remove(new pChunk(wzChunk));
     }
-    public synchronized boolean isWarZone(Chunk wzChunk){
+    public boolean isWarZone(Chunk wzChunk){
         return warzone.containsKey(new pChunk(wzChunk));
     }
     @Nullable
-    public synchronized int getChunkAgressor(Chunk wzChunk){
+    public int getChunkAgressor(Chunk wzChunk){
         if (!isWarZone(wzChunk)) return -1;
         return (int) warzone.get(new pChunk(wzChunk));
     }
-    public synchronized HashMap<pChunk, Integer> getWarzone(){
+    public HashMap<pChunk, Integer> getWarzone(){
         return this.warzone;
     }
-    public synchronized void setWarzone(HashMap<pChunk, Integer> newWZ){
+    public void setWarzone(HashMap<pChunk, Integer> newWZ){
         warzone = newWZ;
     }
-    public synchronized void setWarScore(double newWarScore){
+
+    public void setWarScore(double newWarScore){
         warScore = newWarScore;
         updateBBWarScore();
     }
-    public synchronized void addWarScore(double score){
-        warScore += score;
+    public void addWarScore(double score){
+        if (warScore + score > 1) warScore = 1;
+        else warScore += score;
         updateBBWarScore();
     }
-    public synchronized void removeWarScore(double score){
+    public void removeWarScore(double score){
         if (warScore - score < 0) warScore = 0;
         else warScore -= score;        
         updateBBWarScore();
     }
-    public synchronized double getWarScore(){
+    public double getWarScore(){
         return this.warScore;
     }
-    public synchronized void setPlayerBossbar(Player player){
+
+    public void setPlayerBossBar(Player player){
         Plugin plugin = App.getPlugin(App.class);
+
         if(defenders.members.containsKey(player.getUniqueId())){
             defBar.addPlayer(player);
             player.sendTitle(ChatColor.DARK_RED + "" + ChatColor.BOLD + "War", attackers.getPrefix() + ChatColor.WHITE + " is at war with you!", 10, 50, 20);
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 2f);
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 2f);
             player.setMetadata("atWar", new FixedMetadataValue(plugin, true));
         }
         if(attackers.members.containsKey(player.getUniqueId())){
             atBar.addPlayer(player);
             player.sendTitle(ChatColor.DARK_RED + "" + ChatColor.BOLD + "War", defenders.getPrefix() + ChatColor.WHITE + " is at war with you!", 10, 50, 20);
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 2f);
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 2f);
             player.setMetadata("atWar", new FixedMetadataValue(plugin, true));
         }
     }
-    public synchronized UUID getID(){
-        return this.id;
+    @Nullable
+    public BossBar getPlayerBossBar(Player player){
+        if (defBar.getPlayers().contains(player)) return defBar;
+        if (atBar.getPlayers().contains(player)) return atBar;
+        return null;
     }
-    public synchronized void setID(UUID id){
-        this.id = id;
+    public void removePlayerBossBar(Player player){
+        if (defBar.getPlayers().contains(player)) defBar.removePlayer(player);
+        if (atBar.getPlayers().contains(player)) atBar.removePlayer(player);
+    }
+    public void removeAllBossBar(){
+        defBar.removeAll();
+        atBar.removeAll();
+    }
+
+    public UUID getID(){
+        return this.id;
     }
 }

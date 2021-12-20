@@ -99,3 +99,34 @@ ZenaFactions Plugin Changelog
 -made it such that a faction can only be in one war at a time
 -added endwar thread and method
 -join and leave faction stuff now properly sets you bossbar
+
+0.1.10 [INCOMPATIBLE DATA]
+o Changed Faction datacontainer:
+    - factions now have a seralized version number (yeet should've done that wayy earlier)
+o Changed War datacontainer (version 100):
+    - War contains the following persistent fields:
+        1. War ID (UUID)
+        2. private defenders ID (int)
+        3. private attackers ID (int)
+        4. elapsed seconds (int)
+        5. warzone (Hashmap<pChunk,Integer)
+        6. warscore (double)
+    - War contains the following transient fields:
+        1. defenders (Faction)
+        2. attackers (Faction)
+        3. defbar (BossBar)
+        4. atBar (BossBar)
+        5. timeString (String)
+    - When War initiates transient and persistent fields are set
+    - When War is deserialised, transient fields are set (readObject function)
+    - Now for the real stuff: accessing common fields
+        1. TikTok updates the elapsed time using setAge() - not synchronised
+        2. 
+o Changed pChunk datacontainer:
+    - When pChunk is deserialised, transient fields are set (readObject function)
+o Changed WarThread:
+    x TikTok class
+        - shares War with other threads
+        - updates elapsed seconds (doesn't have to be synchronised)
+        - ends wars if necessary
+        - updates remainingTime String

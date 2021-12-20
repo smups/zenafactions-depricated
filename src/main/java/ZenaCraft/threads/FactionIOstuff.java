@@ -125,6 +125,10 @@ public class FactionIOstuff {
     }
     public void addPlayerToFaction(Faction faction, Player player, int rank){
         faction.addMember(player.getUniqueId(), rank);
+        try{
+            App.warThread.getWarFromFaction(faction).setPlayerBossBar(player);
+        }
+        catch (Exception e) {}
         faction.setInfluence(faction.getInfluence() + player_influence);
         if (playerHashMap.containsKey(player.getUniqueId())) playerHashMap.replace(player.getUniqueId(), faction.getID());
         else playerHashMap.put(player.getUniqueId(), faction.getID());
@@ -149,8 +153,12 @@ public class FactionIOstuff {
     
     public void removePlayerFromFaction(Faction faction, Player player){
         faction.removeMember(player.getUniqueId());
+        try{
+            App.warThread.getWarFromFaction(faction).removePlayerBossBar(player);
+        }
+        catch (Exception e) {}
         faction.setInfluence(faction.getInfluence() - player_influence);
-        if (faction.getMembers().size() == 0) removeFaction(faction);
+        //if (faction.getMembers().size() == 0) removeFaction(faction);
         playerHashMap.remove(player.getUniqueId());
 
         //Messages

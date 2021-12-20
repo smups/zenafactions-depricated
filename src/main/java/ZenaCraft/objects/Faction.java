@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Faction implements Serializable{
+    static final long serialVersionUID = 1L;
+
     String name;
     String[] ranks = {"rank0", "rank1", "rank2"};
     double balance;
