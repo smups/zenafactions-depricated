@@ -214,3 +214,6 @@ o PlayerMove: als je FQC wisselt krijg je geen pop up
 
 1.1.12
 - added loan system
+
+1.1.12.1
+- fixed a bug with legacy Faction deseralization

@@ -26,19 +26,20 @@ public class ListLoans implements CommandExecutor{
 
         String response = App.zenfac + "Avaliable loans: ";
 
-        DecimalFormat df1 = new DecimalFormat("0,00");
-        DecimalFormat df2 = new DecimalFormat("00");
+        DecimalFormat df1 = new DecimalFormat("0.00");
+        DecimalFormat df2 = new DecimalFormat("0");
 
         for(Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
             Faction f = (Faction) mEntry.getValue();
-            response += ChatColor.WHITE + "[" + f.getPrefix() + ChatColor.WHITE + "]";
+            response += ChatColor.WHITE + "[" + f.getPrefix() + ChatColor.WHITE + "]: ";
             
             int i = 1;
             for(AvaliableLoan l : f.getAvaliableLoans()){
                 response += "Loan [" + String.valueOf(i) + "] ";
                 response += ChatColor.GOLD + "Ƒ" + df1.format(l.getInitAmount());
-                response += ChatColor.BOLD + "" + ChatColor.RED + df2.format(l.getInterest()) + "%";
-                response += ChatColor.RESET + " , ";
+                response += ChatColor.BOLD + " " + ChatColor.RED + "@" + df2.format(l.getInterest()*100) + "%";
+                response += ChatColor.RESET + ", ";
+                i++;
             }
         }
 

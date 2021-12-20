@@ -1,5 +1,7 @@
 package ZenaCraft.commands;
 
+import java.text.DecimalFormat;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -42,10 +44,12 @@ public class CreateLoan implements CommandExecutor{
         }
 
         f.removeBalance(amount);
-
         f.createLoan(amount);
 
-        player.sendMessage(App.zenfac + ChatColor.GREEN + "created loan!");
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        player.sendMessage(App.zenfac + ChatColor.GREEN + "created loan! of "+
+            ChatColor.GOLD + "Ƒ" + df.format(amount));
         return true;
     }
 }

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.loans.AvaliableLoan;
+import net.milkbowl.vault.economy.Economy;
 
 public class TakeLoan implements CommandExecutor{
     @Override
@@ -26,7 +27,7 @@ public class TakeLoan implements CommandExecutor{
         int loan;
 
         try{
-            loan = Integer.parseInt(args[1]);
+            loan = Integer.parseInt(args[1]) - 1;
         }
         catch (Exception e){
             App.invalidSyntax(player);
@@ -46,6 +47,9 @@ public class TakeLoan implements CommandExecutor{
 
         AvaliableLoan chosen = faction.getAvaliableLoans().get(loan);
         faction.assignLoan(player, chosen);
+
+        Economy econ = App.getEconomy();
+        econ.depositPlayer(player, chosen.getInitAmount());
 
         DecimalFormat df = new DecimalFormat("0.00");
 

@@ -110,6 +110,7 @@ public final class App extends JavaPlugin
         getCommand("createloan").setExecutor(new CreateLoan());
         getCommand("listloans").setExecutor(new ListLoans());
         getCommand("takeloan").setExecutor(new TakeLoan());
+        getCommand("payloan").setExecutor(new PayLoan());
 
         //all the way at the end we setup the war database
         warThread = new WarThread(war_db);

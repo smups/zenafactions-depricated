@@ -13,6 +13,7 @@ import ZenaCraft.objects.loans.*;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -38,12 +39,12 @@ public class Faction implements Serializable{
     private BannerMeta bm;
 
     //financial stuff
-    private double interest;
-    private int loanlength;
+    private double interest = 0.01;
+    private double loanlength = 100;
     private List<Loan> runningLoans = new ArrayList<Loan>();
     private List<AvaliableLoan> avaliableLoans = new ArrayList<AvaliableLoan>();
 
-    Plugin plugin = App.getPlugin(App.class);
+    transient Plugin plugin = App.getPlugin(App.class);
 
     public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, int newID, Colour newColor){
         name = Name;
@@ -90,6 +91,9 @@ public class Faction implements Serializable{
         //now for the special things
         if (warps == null) warps = new HashMap<String,Warp>();
         if (colour == null) colour = new Colour(0xFFFFFF, ChatColor.WHITE);
+        if (loanlength <= 0.01) loanlength = 0.01;
+        if (avaliableLoans == null) avaliableLoans = new ArrayList<AvaliableLoan>();
+        if (runningLoans == null) runningLoans = new ArrayList<Loan>();
     }
 
     private void updatePrefix(){
@@ -209,14 +213,25 @@ public class Faction implements Serializable{
 
         return resp;
     }
-    public void assignLoan(Player p, AvaliableLoan l){
+    public void assignLoan(OfflinePlayer p, AvaliableLoan l){
         avaliableLoans.remove(l);
         runningLoans.add(new Loan(l, p));
     }
     public void createLoan(double amount){
         avaliableLoans.add(new AvaliableLoan(this, amount));
     }
-    public int getLoanLength(){
+    public void deleteLoan(Loan l){
+        runningLoans.remove(l);
+    }
+    public void deleteLoan(AvaliableLoan l){
+        avaliableLoans.remove(l);
+    }
+    public void renewLoan(Loan l, double newAmount){
+        runningLoans.remove(l);
+        AvaliableLoan nl = new AvaliableLoan(this, newAmount);
+        assignLoan(l.getOfflinePlayer(), nl);
+    }
+    public double getLoanLength(){
         return loanlength;
     }
     public void setLoanLength(int loanlength){

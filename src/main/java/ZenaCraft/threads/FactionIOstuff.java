@@ -101,6 +101,9 @@ public class FactionIOstuff {
         if (!isKnownPlayer(player)) return null;
         return factionHashMap.get(playerHashMap.get(player.getUniqueId()));
     }
+    public Faction getPlayerFaction(OfflinePlayer player){
+        return factionHashMap.get(playerHashMap.get(player.getUniqueId()));
+    }
     public String getPlayerPrefix(Player player){
         return getPlayerFaction(player).getPrefix();
     }

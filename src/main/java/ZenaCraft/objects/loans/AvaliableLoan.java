@@ -11,7 +11,7 @@ public class AvaliableLoan implements Serializable {
     private final UUID loanID;
     private final double interest;
     private final double amount;
-    private final int loanlength;
+    private final double loanlength;
 
     public AvaliableLoan(Faction f, double amount){
         loanID = UUID.randomUUID();
@@ -30,7 +30,7 @@ public class AvaliableLoan implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Loan loan = (Loan) o;
+        AvaliableLoan loan = (AvaliableLoan) o;
         if (!loanID.equals(loan.getID())) return false;
         return true;
     }
@@ -50,7 +50,7 @@ public class AvaliableLoan implements Serializable {
     public double getInitAmount(){
         return this.amount;
     }
-    public int getLoanLength(){
+    public double getLoanLength(){
         return this.loanlength;
     }
 }

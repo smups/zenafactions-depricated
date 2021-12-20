@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.12
+version: 0.1.12.1
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -87,4 +87,7 @@ commands:
     usage: </command>
   takeloan:
     description: takes out loan from a faction. Be sure to pay it back!
+    usage: </command> [faction] [loan number]
+  payloan:
+    description: pays specified loan from specified faction. If you don't have enough money to pay the loan, a new one will be created.
     usage: </command> [faction] [loan number]
