@@ -14,19 +14,20 @@ public class WarpPlayer extends TemplateCommand{
     @Override
     protected boolean run() {
         Faction f = App.factionIOstuff.getPlayerFaction(player);
-        
+
         for(Warp w : f.getWarpList()){
             if(w.getName().equals(args[0])){
-                f.getWarp(args[0]).warpPlayer(player);
+                if (f.getPlayerRank(player).hasPerm(w.getPerm())) w.warpPlayer(player);
+                else return invalidRank(player, w.getPerm());
                 return true;
             }
         }
 
-        Faction df = App.factionIOstuff.getFaction(0);
+        Faction df = App.factionIOstuff.defaultFaction;
 
         for(Warp w : df.getWarpList()){
             if(w.getName().equals(args[0])){
-                df.getWarp(args[0]).warpPlayer(player);
+                w.warpPlayer(player);
                 return true;
             }
         }

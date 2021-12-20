@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
 import ZenaCraft.commands.TemplateCommand;
+import ZenaCraft.events.PlayerChangeRankEvent;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.Rank;
 
@@ -31,7 +32,7 @@ public class ChangeRank extends TemplateCommand{
         Rank pRank = f.getPlayerRank(player);
         Rank tRank = f.getPlayerRank(target);
 
-        if(pRank.getLevel() <= tRank.getLevel()){
+        if(pRank.getLevel() < tRank.getLevel()){
             player.sendMessage(App.zenfac + ChatColor.RED + "Can't change the rank of a player with more permissions than you!");
             return true;
         }
@@ -43,6 +44,10 @@ public class ChangeRank extends TemplateCommand{
             player.sendMessage(App.zenfac + ChatColor.RED + "No such rank exits!");
             return true;
         }
+
+        //create event
+        PlayerChangeRankEvent event = new PlayerChangeRankEvent(f, player, target, tRank, newRank);
+        event.callEvent();
 
         f.changeRank(target.getUniqueId(), newRank);
         

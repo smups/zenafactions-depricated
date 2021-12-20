@@ -299,10 +299,48 @@ features:
 - players can now add permissions to a rank
 - players can now remove permissions from a rank
 - added code to automatically add new permissions to the first 3 ranks of a faction
+- added OS info to log data
+- log files are now sent to developer every 6h (if logging is enabled)
+- logfiles are now deleted upon being sent
+- clarified config
 
 command changes:
 + added /addrankperm command
 + added /removerankperm command
++ added /listranks command
+o /lognow is now also avaliable in the console
+o /createfaction now follows standard format
+o /listwarps no longer shows unaccesable ranks
 
 bugfixes:
 - fixed bug while loading factions with the new perm system (post 0.1.15)
+- clarified dependency errors: missing dependencies no longer throw massive errors; small and readable error messages
+- unsuccesful enabling no longer causes the plugin to throw errors on shutdown
+- unssuccesful enabling no longer causes data corruption, your savefiles are safe(r)
+- fixed obscure recursive function causing stackoverflow
+- fixed bug with faction founder getting lowest rank instead of highest rank
+- removed dynmap as a dependency (Main plugin doesn't depend on it anymore since 0.1.12)
+- loading a non-legacy warp no longer throws a "found legacy warp" message in the console
+- ops joining any faction are now automatically given the highest rank
+- can now change rank of player with same number of permissions as you
+- fixed warp permissions
+- removed -copy from copied ranks if they were copied in the process of creating a new faction
+
+0.1.15.4
+bugfixes:
+- fixed bug in logger: autologger no longer throws errors if there's nothing to log
+- fixed bug in plugin startup: if you run the plugin for the first time, it'll now actually create a new faction instead of throwing an error (I'm so sorry for missing this guys!)
+- slight tweaks to the logging manager
+
+0.1.16.1
+features:
+- added support for ZFDynamp 0.1.1
+- reworked faction claiming (under the hood improvements)
+
+bugfixes:
+- database initialisation is now safe(r)
+
+0.1.16.2
+-- release update of 0.1.16! --
+bugfixes:
+- fixed bug with loading legacy player data

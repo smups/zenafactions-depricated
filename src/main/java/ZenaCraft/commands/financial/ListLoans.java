@@ -17,8 +17,7 @@ public class ListLoans extends TemplateCommand{
     protected boolean run() {
         String response = App.zenfac + "Avaliable loans:\n";
 
-        for(Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction f = (Faction) mEntry.getValue();
+        for(Faction f : App.factionIOstuff.getFactionList()){
             response += ChatColor.WHITE + "[" + f.getPrefix() + ChatColor.WHITE + "]:\n";
             
             int i = 1;

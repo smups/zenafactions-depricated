@@ -2,11 +2,14 @@ package ZenaCraft.listeners;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import ZenaCraft.App;
+import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.FactionQChunk;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 
@@ -22,13 +25,17 @@ public class CreateClaim implements Listener {
         for (Chunk chunk : claim.getChunks()){
             int chunkX = (int) chunk.getX();
             int chunkZ = (int) chunk.getZ();
-            String FQCName = App.factionIOstuff.calcFQCName(chunkX, chunkZ, null, null);
 
-            byte[][] chunkData = App.factionIOstuff.getFQC(FQCName).getChunkData();
-            int ownerID = chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)];
-            if (ownerID == -1) continue; //anyone can claim in neutral territory
-            byte playerFaction = (byte) App.factionIOstuff.getPlayerFaction(player).getID();
-            if (ownerID != playerFaction) condition += 1;
+            FactionQChunk fqc = App.factionIOstuff.getFQC(
+                App.factionIOstuff.calcFQCName(chunkX, chunkZ, null, null)
+            );
+
+            Faction owner = fqc.getOwner(new Location(chunk.getWorld(), chunkX*16, 0, chunkZ*16));
+
+            if (owner == null) continue; //anyone can claim in neutral territory
+
+            Faction playerFaction = App.factionIOstuff.getPlayerFaction(player);
+            if (!playerFaction.equals(owner)) condition += 1;
         }
 
         if(claim.isAdminClaim()) condition = 0;

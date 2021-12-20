@@ -14,6 +14,10 @@ public class Colour implements Serializable{
         hexColour= hex;
         mcColour = mc;
     }
+    public Colour(Colour that){
+        this.hexColour = that.hexColour;
+        this.mcColour = that.mcColour;
+    }
 
     @Override
     public boolean equals(Object o){

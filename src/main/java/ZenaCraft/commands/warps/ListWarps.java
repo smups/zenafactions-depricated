@@ -38,7 +38,7 @@ public class ListWarps extends TemplateCommand{
 
 
         //now add the default warps anyone can access!
-        Faction defaulFaction = App.factionIOstuff.getFaction(0);
+        Faction defaulFaction = App.factionIOstuff.defaultFaction;
 
         if (defaulFaction.equals(faction)){
             player.sendMessage(response);

@@ -24,6 +24,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
+import ZenaCraft.events.WarDeclaredEvent;
 
 public class War implements Serializable{
     static final long serialVersionUID = 100L;
@@ -33,9 +34,9 @@ public class War implements Serializable{
     private double warScore;
     private int elapsedSeconds;
     private int endSecond;
-    private int attackersID;
-    private int defendersID;
-    private HashMap<pChunk,Integer> warzone = new HashMap<pChunk, Integer>();
+    private UUID attackersID;
+    private UUID defendersID;
+    private HashMap<pChunk, UUID> warzone = new HashMap<pChunk, UUID>();
     private List<String> warzoneMarkers = new ArrayList<String>(); 
 
     //transient fields
@@ -63,6 +64,10 @@ public class War implements Serializable{
         createBossBar();
         updateBBWarScore();
         updateBBTitle();
+
+        //call event
+        WarDeclaredEvent event = new WarDeclaredEvent(this);
+        event.callEvent();
     }
 
     //Method that is called upon deseralisation, sets the transient fields
@@ -176,8 +181,8 @@ public class War implements Serializable{
         return this.endSecond;
     }
 
-    public void addWarzoneChunk(Chunk wzChunk, int agressor){
-        warzone.put(new pChunk(wzChunk), agressor);
+    public void addWarzoneChunk(Chunk wzChunk, Faction agressor){
+        warzone.put(new pChunk(wzChunk), agressor.getID());
     }
     public List<String> getWarZoneMarkers(){
         return this.warzoneMarkers;
@@ -189,14 +194,15 @@ public class War implements Serializable{
         return warzone.containsKey(new pChunk(wzChunk));
     }
     @Nullable
-    public int getChunkAgressor(Chunk wzChunk){
-        if (!isWarZone(wzChunk)) return -1;
-        return (int) warzone.get(new pChunk(wzChunk));
+    public Faction getChunkAgressor(Chunk wzChunk){
+        if (!isWarZone(wzChunk)) return null;
+        UUID agressor = warzone.get(new pChunk(wzChunk));
+        return App.factionIOstuff.getFaction(agressor);
     }
-    public HashMap<pChunk, Integer> getWarzone(){
+    public HashMap<pChunk, UUID> getWarzone(){
         return this.warzone;
     }
-    public void setWarzone(HashMap<pChunk, Integer> newWZ){
+    public void setWarzone(HashMap<pChunk, UUID> newWZ){
         warzone = newWZ;
     }
 

@@ -12,6 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import ZenaCraft.App;
+import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.FactionQChunk;
 
 public class PlayerMove implements Listener{
 
@@ -60,12 +62,24 @@ public class PlayerMove implements Listener{
             }
             //Niet naar een nieuwe FQC dus
             else{
-                byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
-                byte newOwnerID = App.factionIOstuff.getFQC(newFQCName).getChunkData()[Math.abs(newChunk.getX()) % 100][Math.abs(newChunk.getZ()) % 100];
-                if (oldOwnerID != newOwnerID){
-                    if (newOwnerID == -1) player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
-                    else player.sendTitle("Entering: " + App.factionIOstuff.getFaction(newOwnerID).getPrefix(), "", 10, 35, 20);
+                FactionQChunk oldFQC = App.factionIOstuff.getFQC(oldFQCName);
+                FactionQChunk newFQC = App.factionIOstuff.getFQC(newFQCName);
+
+                Faction oldOwner = oldFQC.getOwner(oldLocation);
+                Faction newOwner = newFQC.getOwner(newLocation);
+
+                //vergelijken en update sturen!
+                if (oldOwner == null && newOwner == null) {} //do nothing
+                else if (oldOwner == null){
+                    player.sendTitle("Entering: " + newOwner.getPrefix(), "", 10, 35, 20);
                 }
+                else if (newOwner == null){
+                    player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
+                }
+                else if (!newOwner.equals(oldOwner)){
+                    player.sendTitle("Entering: " + newOwner.getPrefix(), "", 10, 35, 20);
+                }
+
                 //Code voor autoclaiming
                 autoClaimFunc(null, player, newLocation);
             }
@@ -110,7 +124,8 @@ public class PlayerMove implements Listener{
             //dit is voor de titel sending shit
             Chunk oldChunk = oldLocation.getChunk();
             String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
-            byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
+            FactionQChunk oldFQC = App.factionIOstuff.getFQC(oldFQCName);
+            Faction oldOwner = oldFQC.getOwner(oldLocation);
 
             try{
                 //Wacht totdat de **verwijder** thread klaar is
@@ -142,14 +157,20 @@ public class PlayerMove implements Listener{
 
             //Dit is de titel data van de nieuwe chunk
             Chunk newChunk = newLocation.getChunk();           
-            String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);            
-            byte newOwnerID = App.factionIOstuff.getFQC(newFQCName).getChunkData()[Math.abs(newChunk.getX()) % 100][Math.abs(newChunk.getZ()) % 100];
-
+            String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);
+            FactionQChunk newFQC = App.factionIOstuff.getFQC(newFQCName);
+            Faction newOwner = newFQC.getOwner(newLocation);
 
             //vergelijken en update sturen!
-            if (oldOwnerID != newOwnerID){
-                if (newOwnerID == -1) player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
-                else player.sendTitle("Entering: " + App.factionIOstuff.getFaction(newOwnerID).getPrefix(), "", 10, 35, 20);
+            if (oldOwner == null && newOwner == null) {} //do nothing
+            else if (oldOwner == null){
+                player.sendTitle("Entering: " + newOwner.getPrefix(), "", 10, 35, 20);
+            }
+            else if (newOwner == null){
+                player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
+            }
+            else if (!newOwner.equals(oldOwner)){
+                player.sendTitle("Entering: " + newOwner.getPrefix(), "", 10, 35, 20);
             }
 
         }

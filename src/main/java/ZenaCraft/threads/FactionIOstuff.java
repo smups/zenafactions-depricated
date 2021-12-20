@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +32,9 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import ZenaCraft.App;
 import ZenaCraft.events.AsyncFQCChangeEvent;
+import ZenaCraft.events.PlayerJoinFactionEvent;
+import ZenaCraft.events.PlayerLeaveFactionEvent;
+import ZenaCraft.exceptions.ByteOverFlowException;
 import ZenaCraft.objects.Colour;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.FactionQChunk;
@@ -37,14 +42,19 @@ import ZenaCraft.objects.Rank;
 import ZenaCraft.objects.loans.Loan;
 
 public class FactionIOstuff {
+
+    //notify plugin that we've initiated
+    public static boolean isInit = false;
     
+    //actual data that this thing manages
     private HashMap<String, FactionQChunk> loadedFQChunks= new HashMap<String, FactionQChunk>();
-    private HashMap<UUID, Integer> playerHashMap = new HashMap<UUID, Integer>();
+    private HashMap<UUID, UUID> playerHashMap = new HashMap<UUID, UUID>();
     private HashMap<UUID, List<Loan>> playerLoanMap = new HashMap<UUID, List<Loan>>();
-    private HashMap<Integer, Faction> factionHashMap = new HashMap<Integer, Faction>();
+    private HashMap<UUID, Faction> factionHashMap = new HashMap<UUID, Faction>();
 
     private Plugin plugin = App.getPlugin(App.class);
 
+    //config strings and suchInteger
     private String player_db;
     private String faction_db;
     private String zenfac;
@@ -53,7 +63,10 @@ public class FactionIOstuff {
     private double player_influence;
 
     //perms
-    private String claimchunkperm = "claimchunk";
+    private String claimchunkperm = "privateclaimchunk";
+
+    //default faction
+    public static Faction defaultFaction;
 
     public FactionIOstuff(String player_db_, String faction_db_, String zenfac_, String FQChunk_db_){
         player_db = player_db_;
@@ -67,7 +80,8 @@ public class FactionIOstuff {
         //register perms
         App.registerPerm(claimchunkperm, 1);
 
-        new InitDB();
+        //do init stuff
+        initDB();
     }
 
     //+++ GETTERS EN SETTERS +++
@@ -89,14 +103,14 @@ public class FactionIOstuff {
     }
 
     //Players
-    public void setKnownPlayers(HashMap<UUID, Integer> PHM){
+    public void setKnownPlayers(HashMap<UUID, UUID> PHM){
         playerHashMap = PHM;
     }
-    public HashMap<UUID, Integer> getKnownPlayers(){
+    public HashMap<UUID, UUID> getKnownPlayers(){
         return this.playerHashMap;
     }
     public void addKnownPlayer(Player player){
-        int playerFactionID = getPlayerFaction(player).getID();
+        UUID playerFactionID = getPlayerFaction(player).getID();
         playerHashMap.put(player.getUniqueId(), playerFactionID);
     }
     public void removeKnownPlayer(Player player){
@@ -132,7 +146,12 @@ public class FactionIOstuff {
         playerLoanMap.replace(player.getUniqueId(), loans);
     }
     public HashMap<UUID, List<Loan>> getPlayerLoanMap(){
-        return this.getPlayerLoanMap();
+        return this.playerLoanMap;
+    }
+    public int calcNumLoans(){
+        int num = 0;
+        for (List<Loan> list : playerLoanMap.values()) num += list.size();
+        return num;
     }
     public List<Loan> getPlayerLoans(Player player){
         return playerLoanMap.get(player.getUniqueId());
@@ -170,31 +189,41 @@ public class FactionIOstuff {
     }
 
     //Factions
-    public void setFactionList(HashMap<Integer, Faction> FHM){
+    public void setFactionList(HashMap<UUID, Faction> FHM){
         factionHashMap = FHM;
     }
-    public HashMap<Integer, Faction> getFactionList(){
+    public HashMap<UUID, Faction> getFactionMap(){
         return this.factionHashMap;
     }
-    public Faction getFaction(int ID){
+    public List<Faction> getFactionList(){
+        return new ArrayList<Faction>(this.factionHashMap.values());
+    }
+    public Faction getFaction(UUID ID){
         return this.factionHashMap.get(ID);
     }
     public void addFaction(Faction faction){
         factionHashMap.put(faction.getID(), faction);
     }
     public void removeFaction(Faction faction){
-        if(faction.getID() == 0) return;
+        if(faction.equals(defaultFaction)) return;
         factionHashMap.remove(faction.getID());
         saveDB();
     }
     public void addPlayerToFaction(Faction faction, Player player, Rank rank){
+        //if the player is op, give them top rank
+        if (player.isOp()) rank = faction.getRanks().get(0);
+
         faction.addMember(player.getUniqueId(), rank);
 
         try{
             App.warThread.getWarFromFaction(faction).setPlayerBossBar(player);
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            Bukkit.getLogger().warning(App.zenfac + e.getLocalizedMessage());
+        }
+
         faction.setInfluence(faction.getInfluence() + player_influence);
+
         if (playerHashMap.containsKey(player.getUniqueId())) playerHashMap.replace(player.getUniqueId(), faction.getID());
         else playerHashMap.put(player.getUniqueId(), faction.getID());
 
@@ -214,19 +243,30 @@ public class FactionIOstuff {
 
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
         player.sendMessage(zenfac + ChatColor.GREEN + "Joined faction: " + faction.getPrefix());
+
+        //trhow events
+        PlayerJoinFactionEvent event = new PlayerJoinFactionEvent(faction, player);
+        event.callEvent();
     }
     public void addPlayerToFaction(Faction faction, Player player){
         addPlayerToFaction(faction, player, faction.getDefaultRank());
     }
     
     public void removePlayerFromFaction(Faction faction, Player player){
+
         faction.removeMember(player.getUniqueId());
+        
         try{
             App.warThread.getWarFromFaction(faction).removePlayerBossBar(player);
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            Bukkit.getLogger().info(App.zenfac + e.getLocalizedMessage());
+        }
+
         faction.setInfluence(faction.getInfluence() - player_influence);
+
         if (faction.getMembers().size() == 0) removeFaction(faction);
+
         playerHashMap.remove(player.getUniqueId());
 
         //Messages
@@ -237,6 +277,10 @@ public class FactionIOstuff {
             fmember.playSound(fmember.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
             fmember.sendMessage(zenfac + ChatColor.RED + player.getName() + " left your faction!");
         }
+
+        //Events
+        PlayerLeaveFactionEvent event = new PlayerLeaveFactionEvent(faction, player);
+        event.callEvent();
     }
     public void changePlayerFaction(Faction newFaction, Player player, Rank rank){
         removePlayerFromFaction(getPlayerFaction(player), player);
@@ -269,32 +313,37 @@ public class FactionIOstuff {
 
         public void run(){
             //Save Faction DB
-            try{
-                FileOutputStream file = new FileOutputStream(faction_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                out.writeObject(factionHashMap);
-                out.close();
-                file.close();
-                plugin.getLogger().info(zenfac + "Saved faction data");
-            }
-            catch (IOException i){
-                i.printStackTrace();
-            }
-    
-            //Save Player DB
-            try{
-                FileOutputStream file = new FileOutputStream(player_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                out.writeObject(playerHashMap);
-                out.close();
-                file.close();
-                plugin.getLogger().info(zenfac + "Saved player data");
-            }
-            catch (IOException i){
-                i.printStackTrace();
+            if (factionHashMap != null && !factionHashMap.isEmpty()){
+                try{
+                    FileOutputStream file = new FileOutputStream(faction_db);
+                    ObjectOutputStream out = new ObjectOutputStream(file);
+                    out.writeObject(factionHashMap);
+                    out.close();
+                    file.close();
+                    plugin.getLogger().info(zenfac + "Saved faction data");
+                }
+                catch (IOException i){
+                    i.printStackTrace();
+                }
+        
+                //Save Player DB
+                if (playerHashMap != null && !playerHashMap.isEmpty()){
+                    try{
+                        FileOutputStream file = new FileOutputStream(player_db);
+                        ObjectOutputStream out = new ObjectOutputStream(file);
+                        out.writeObject(playerHashMap);
+                        out.close();
+                        file.close();
+                        plugin.getLogger().info(zenfac + "Saved player data");
+                    }
+                    catch (IOException i){
+                        i.printStackTrace();
+                    }
+                }
             }
 
             //save FQC DB
+            if (loadedFQChunks == null) return;
             for (Map.Entry mEntry : loadedFQChunks.entrySet()){
                 FactionQChunk FQC = (FactionQChunk) mEntry.getValue();
                 FQC.saveFQChunkData();
@@ -399,11 +448,11 @@ public class FactionIOstuff {
                     Bukkit.getLogger().info("Chunk [" + String.valueOf(chunkX) + "," + String.valueOf(chunkZ) + "] in claimed in FQC: " +
                         FQCName + "@[" + String.valueOf(Math.abs(chunkX % 100)) + "," + String.valueOf(Math.abs(chunkZ % 100)) + "]");
 
-                    byte[][] chunkData = fqc.getChunkData();
-                    int ownerID = chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)];
+                    Location offSetLocation = new Location(location.getWorld(), chunkX*16, 0, chunkZ*16);
+                    Faction owner = fqc.getOwner(offSetLocation);
 
                     //Check if the chunk is avaliable
-                    if (ownerID != -1){
+                    if (owner != null){
                         player.sendMessage(zenfac + ChatColor.DARK_RED + "This chunk is already claimed!");
                         continue;
                     }
@@ -411,6 +460,7 @@ public class FactionIOstuff {
                     //if it is, claim it!
 
                     //check if faction has enough influence to claim the chunk
+
                     //IF faction isn't specified
                     if (f == null){
                         double claimCost = plugin.getConfig().getDouble("Claim Influence Cost");
@@ -425,7 +475,15 @@ public class FactionIOstuff {
                     }
 
                     //this line does the actual claiming
-                    chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)] = (byte) playerFaction.getID();
+                    try{
+                        fqc.setOwner(playerFaction, offSetLocation);
+                    }
+                    catch (ByteOverFlowException e){
+                        if (player != null) player.sendMessage(zenfac + ChatColor.RED +
+                            "cannot claim this chunk because the maximum number of factions " +
+                            "in this area has been reached!");
+                        continue;
+                    }
 
                     //record that we've changed a FQC
                     if (!mFQCs.contains(fqc)) mFQCs.add(fqc);
@@ -461,8 +519,7 @@ public class FactionIOstuff {
         objective = board.registerNewObjective("test", "dummy", ChatColor.BOLD + "Faction Influence");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
-            Faction value = (Faction) mapElement.getValue();
+        for (Faction value : getFactionList()){
             Score score = objective.getScore(value.getPrefix());
             score.setScore( (int) value.getInfluence());
         }
@@ -596,152 +653,142 @@ public class FactionIOstuff {
         return LFQC.getThread();
     }
 
-    //Deze wordt alleen gebruikt in de constructor, dus geen method erbij
-    private class InitDB implements Runnable{
-        private Thread t;
+    //Deze wordt alleen gebruikt in de constructor  
+    private void initDB(){
+        plugin.getLogger().info("Loading databases...");
 
-        public InitDB(){
-            this.start();
-            try{
-                t.join();
-            }
-            catch (InterruptedException i){
-                Bukkit.getLogger().severe(zenfac + i.getLocalizedMessage());
+        String[] folders = new String[] {"plugins/ZenaFactions/dat", FQChunk_db + "Q1", FQChunk_db + "Q2", FQChunk_db + "Q3", FQChunk_db + "Q4"};
+
+        for (String folder_name : folders){
+            File dat = new File(folder_name);
+
+            if(!dat.exists()){
+                dat.mkdirs();
+                plugin.getLogger().info(zenfac + "No "+ folder_name +" folder found. Making one...");
             }
         }
 
-        public void start(){
-            if (t == null){
-                t = new Thread(this);
-                t.start();
-            }
-        }
+        //load faction stuff
+        loadFactionData();
+
+        //load player stuff AFTER factions, we need working factions to parse legacy playerdata!
+        //loadPlayerData();
+        makePlayerMap();
+
+        //notify plugin and user of db init
+        isInit = true;
+        plugin.getLogger().info(zenfac + "Database init finished!");
+    }
+
+    private void makePlayerMap(){
+        HashMap<UUID, UUID> playerMap = new HashMap<UUID, UUID>();
         
-        public void run(){
-            plugin.getLogger().info("Loading databases...");
-    
-            String[] folders = new String[] {"plugins/ZenaFactions/dat", FQChunk_db + "Q1", FQChunk_db + "Q2", FQChunk_db + "Q3", FQChunk_db + "Q4"};
-    
-            for (String folder_name : folders){
-                File dat = new File(folder_name);
-    
-                if(!dat.exists()){
-                    dat.mkdirs();
-                    plugin.getLogger().info(zenfac + "No "+ folder_name +" folder found. Making one...");
-                }
-            }
-    
-            File players = new File(player_db);
-    
-            if (!players.exists()){
-                try{
-                    FileOutputStream file = new FileOutputStream(player_db);
-                    ObjectOutputStream out = new ObjectOutputStream(file);
-                    HashMap<UUID, String> player_factions = new HashMap<UUID, String>();
-                    out.writeObject(player_factions);
-                    out.close();
-                    file.close();
-                    plugin.getLogger().info(zenfac + "Created player data");
-                }
-                catch (IOException i){
-                    i.printStackTrace();
-                }
-            }
-            else{
-                try{
-                    plugin.getLogger().info(zenfac + "Loading player data...");
-                    FileInputStream file = new FileInputStream(player_db);
-                    ObjectInputStream in = new ObjectInputStream(file);
-                    playerHashMap = (HashMap<UUID, Integer>) in.readObject();
-                    in.close();
-                    file.close();
-                }
-                catch (IOException i){
-                    i.printStackTrace();
-                }
-                catch(ClassNotFoundException c){
-                    c.printStackTrace();
-                }
-            }
-    
-            File factions = new File(faction_db);
-    
-            if (!factions.exists()){
-                try{
-                    FileOutputStream file = new FileOutputStream(faction_db);
-                    ObjectOutputStream out = new ObjectOutputStream(file);
-    
-                    Colour defaultColour = new Colour(0x55FFFF, ChatColor.AQUA);
-                    Faction defaultFaction = new Faction(default_fname, 0.0, 
-                        null, 0, defaultColour);
-                        
-                    factionHashMap.put(0, defaultFaction);
-    
-                    out.writeObject(factionHashMap);
-                    out.close();
-                    file.close();
-                    plugin.getLogger().info(zenfac + "Created faction data");
-                }
-                catch (IOException i){
-                    i.printStackTrace();
-                }
-                
-            }
-            else{
-                try{
-                    plugin.getLogger().info(zenfac + "Loading faction data...");
-                    FileInputStream file = new FileInputStream(faction_db);
-                    ObjectInputStream in = new ObjectInputStream(file);
-                    factionHashMap = (HashMap<Integer, Faction>) in.readObject();
-                    in.close();
-                    file.close();
+        for (Faction f : factionHashMap.values()){
+            for (UUID playerID : f.getMembers().keySet()){
+                playerMap.put(playerID, f.getID());
 
-                    //say nice things in chat and parse legacy warps
-                    //also register loans!
-                    factionHashMap.values().forEach((faction) -> {
-                        plugin.getLogger().info("Found Faction: " + faction.getPrefix());
-                        parseLegacy(faction);
-
-                        //now register the loans!
-                        faction.getRunningLoans().forEach((loan) -> {
-                            addPlayerLoan(loan, loan.getOfflinePlayer());
-                        });
-                    });
-
-                }
-                catch (IOException i){
-                    i.printStackTrace();
-                }
-                catch(ClassNotFoundException c){
-                    c.printStackTrace();
-                }
+                String playerName = Bukkit.getOfflinePlayer(playerID).getName();
+                Bukkit.getLogger().info("Added player " + playerName + " to faction: " +
+                    f.getID().toString());
             }
-
-            plugin.getLogger().info(zenfac + "Database init finished!");
         }
 
-        private void parseLegacy(Faction faction){
-            if(faction.hasLegacyWarps()){
-                Bukkit.getLogger().info(App.zenfac + "Found legacy (pre 0.1.15) warps! Parsing data...");
+        playerHashMap = playerMap;
+    }
 
-                //parse all the legacy warps
-                faction.getLegacyWarps().forEach((warp) ->{
-                    //add permission to warp
-                    warp.setPerm();
+    private void loadFactionData(){
+        File factions = new File(faction_db);
 
-                    //add permission to the right rank!
-                    int rankReq = warp.getOldRankReq();
+        if (!factions.exists()){
+            try{
+                FileOutputStream file = new FileOutputStream(faction_db);
+                ObjectOutputStream out = new ObjectOutputStream(file);
 
-                    if(rankReq >= 0) faction.getRanks().get(0).addPerm(warp.getPerm());
-                    if(rankReq >= 1) faction.getRanks().get(1).addPerm(warp.getPerm());
-                    if(rankReq >= 2) faction.getRanks().get(2).addPerm(warp.getPerm());
-                });
+                Colour defaultColour = new Colour(0x55FFFF, ChatColor.AQUA);
+                Faction defaultFaction = new Faction(default_fname, 0.0, 
+                    null, defaultColour);
+                    
+                factionHashMap.put(defaultFaction.getID(), defaultFaction);
 
-                //delete the legacy warps we no longer need!
-                faction.clearLegacyWarps();
+                out.writeObject(factionHashMap);
+                out.close();
+                file.close();
+                plugin.getLogger().info(zenfac + "Created faction data");
             }
-            Bukkit.getLogger().info(App.zenfac + ChatColor.DARK_GRAY + "Successfully converted warp!");
+            catch (IOException i){
+                i.printStackTrace();
+            }
+            
+        }
+        else{
+            try{
+                plugin.getLogger().info(zenfac + "Loading faction data...");
+                FileInputStream file = new FileInputStream(faction_db);
+                ObjectInputStream in = new ObjectInputStream(file);
+
+                Collection<Faction> fSet = null;
+
+                try{
+                    //try to read new data
+                    HashMap<UUID, Faction> oldMap = (HashMap<UUID, Faction>) in.readObject();
+                    fSet = oldMap.values();
+                    in.close();
+                    file.close();
+                }
+                catch (Exception e){
+                    plugin.getLogger().severe("something went wrong while reading faction data!");
+                }
+
+                //put all the factions we found in the factionhashmap           
+                for (Faction f : fSet){
+                    factionHashMap.put(f.getID(), f);
+                    plugin.getLogger().info(f.getName() + " OldID = " + String.valueOf(f.getOldID()) +
+                        " newID = " + f.getID().toString());
+                }
+
+                //find default faction
+                for (Faction f : factionHashMap.values())
+                    if (f.isDefault()) defaultFaction = f;
+
+                //say nice things in chat and parse legacy warps
+                //also register loans!
+                factionHashMap.values().forEach((faction) -> {
+                    plugin.getLogger().info("Found Faction: " + faction.getPrefix());
+                    parseLegacy(faction);
+
+                    //now register the loans!
+                    faction.getRunningLoans().forEach((loan) -> {
+                        addPlayerLoan(loan, loan.getOfflinePlayer());
+                    });
+                });
+            }
+            catch (IOException i){
+                i.printStackTrace();
+            }
         }
     }
 
+    private void parseLegacy(Faction faction){
+        if(faction.hasLegacyWarps()){
+            Bukkit.getLogger().info(App.zenfac + "Found legacy (pre 0.1.15) warps! Parsing data...");
+
+            //parse all the legacy warps
+            faction.getLegacyWarps().forEach((warp) ->{
+                //add permission to warp
+                warp.setPerm();
+
+                //add permission to the right rank!
+                int rankReq = warp.getOldRankReq();
+
+                if(rankReq >= 0) faction.getRanks().get(0).addPerm(warp.getPerm());
+                if(rankReq >= 1) faction.getRanks().get(1).addPerm(warp.getPerm());
+                if(rankReq >= 2) faction.getRanks().get(2).addPerm(warp.getPerm());
+            });
+
+            //delete the legacy warps we no longer need!
+            faction.clearLegacyWarps();
+
+            Bukkit.getLogger().info(App.zenfac + ChatColor.DARK_GRAY + "Successfully converted warp!");
+        }            
+    }
 }

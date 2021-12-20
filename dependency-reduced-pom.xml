@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ZenaCraft</groupId>
   <artifactId>ZenaFactions</artifactId>
-  <version>0.1.14.1-SNAPSHOT</version>
+  <version>0.1.16.2-BETA</version>
   <build>
     <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
     <resources>
@@ -29,12 +29,22 @@
               <artifactSet>
                 <includes>
                   <include>com.fasterxml.jackson.core</include>
+                  <include>com.github.oshi</include>
+                  <include>net.java.dev.jna</include>
                 </includes>
               </artifactSet>
               <relocations>
                 <relocation>
                   <pattern>com.fasterxml.jackson</pattern>
                   <shadedPattern>com.fasterxml.zenafactions</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.github.oshi</pattern>
+                  <shadedPattern>com.github.oshi.zenafactions</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>net.java.dev.jna</pattern>
+                  <shadedPattern>net.java.dev.jna.zenafactions</shadedPattern>
                 </relocation>
               </relocations>
               <minimizeJar>true</minimizeJar>
@@ -87,7 +97,7 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>3.0.2</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.github.TechFortress</groupId>
@@ -99,7 +109,7 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <version>3.6.1</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>

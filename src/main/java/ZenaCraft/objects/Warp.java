@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -91,7 +90,7 @@ public class Warp implements Serializable{
 
         Faction faction = App.factionIOstuff.getPlayerFaction(player);
 
-        if (faction.getID() != 0){
+        if (faction.equals(App.factionIOstuff.defaultFaction)){
             if (!faction.getPlayerRank(player).hasPerm(perm)){
                 App.getCommon().invalidRank(player, perm);
                 player.setMetadata("warpPlayer", new FixedMetadataValue(App.getPlugin(App.class), false));
@@ -112,10 +111,8 @@ public class Warp implements Serializable{
         player.teleport(loc);
 
         //money stuff
-        if (faction.getID() != -1){
-            econ.withdrawPlayer(player, player.getWorld().getName(), warpcost);
-            faction.addBalance(warpcost*(factionTax/(1 + factionTax)));
-        }
+        econ.withdrawPlayer(player, player.getWorld().getName(), warpcost);
+        faction.addBalance(warpcost*(factionTax/(1 + factionTax)));
         
         //call playerMoveEvent
         PlayerMoveEvent e = new PlayerMoveEvent(player, player.getLocation(), loc);

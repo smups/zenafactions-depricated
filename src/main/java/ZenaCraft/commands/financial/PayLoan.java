@@ -1,8 +1,5 @@
 package ZenaCraft.commands.financial;
 
-import java.util.Map.Entry;
-
-import org.apache.commons.math3.exception.OutOfRangeException;
 import org.bukkit.ChatColor;
 
 import ZenaCraft.App;
@@ -17,8 +14,7 @@ public class PayLoan extends TemplateCommand{
     protected boolean run() {
         Faction faction = null;
 
-        for(Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction f = (Faction) mEntry.getValue();
+        for(Faction f : App.factionIOstuff.getFactionList()){
             if (f.getName().equals(args[0])) faction = f;
         }
 

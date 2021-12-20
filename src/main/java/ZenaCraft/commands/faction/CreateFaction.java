@@ -1,7 +1,5 @@
 package ZenaCraft.commands.faction;
 
-import java.util.Map;
-
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
@@ -13,6 +11,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.economy.Economy;
 
 public class CreateFaction extends TemplateCommand{
+    
     Plugin plugin = App.getPlugin(App.class);
     Economy econ = App.getEconomy();
 
@@ -32,10 +31,9 @@ public class CreateFaction extends TemplateCommand{
         player.setMetadata("createFaction", new FixedMetadataValue(plugin, false));
 
 
-        String name = args[0];
+        String name = this.args[0];
 
-        for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction f = (Faction) mEntry.getValue();
+        for (Faction f : App.factionIOstuff.getFactionList()){
             if (f.getName() == name){
                 player.sendMessage(App.zenfac + ChatColor.RED + "Faction Already exists!");
                 return true;
@@ -45,28 +43,16 @@ public class CreateFaction extends TemplateCommand{
         if (econ.getBalance(player) < faction_cost) return insufficientFunds(player);
 
         Colour c = new Colour(0xFFFFFF, org.bukkit.ChatColor.WHITE);
-
-        int newID = 0;
-        while (newID < 127){
-            if (!App.factionIOstuff.getFactionList().containsKey(newID)) break;
-            newID++;
-        }
-
-        Faction newFaction = new Faction(name, faction_cost, player, newID, c);
+        Faction newFaction = new Faction(name, faction_cost, player, c);
 
         App.factionIOstuff.addFaction(newFaction);
-
-        App.factionIOstuff.changePlayerFaction(newFaction, player);
 
         //scoreboard stuff
         App.factionIOstuff.reloadScoreBoard(null);
 
         econ.withdrawPlayer(player, faction_cost);
-
-        player.setMetadata("faction", new FixedMetadataValue(plugin, name));
-        player.setMetadata("factionID", new FixedMetadataValue(plugin, newID));
         
-        player.sendMessage(App.zenfac + ChatColor.DARK_RED + "Created faction: " + name);
+        player.sendMessage(App.zenfac + ChatColor.GREEN + "Created faction: " + name);
         
         return true;
     }

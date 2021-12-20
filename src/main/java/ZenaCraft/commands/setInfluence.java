@@ -17,9 +17,7 @@ public class SetInfluence extends TemplateCommand{
             player.sendMessage(App.zenfac + ChatColor.RED + "Admin command only");
         }
 
-        for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-
-            Faction faction = (Faction) mEntry.getValue();
+        for (Faction faction : App.factionIOstuff.getFactionList()){
 
             if (faction.getName().equals(args[0])){
 

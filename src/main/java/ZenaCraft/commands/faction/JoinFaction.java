@@ -1,7 +1,5 @@
 package ZenaCraft.commands.faction;
 
-import java.util.Map;
-
 import org.bukkit.ChatColor;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
@@ -33,9 +31,7 @@ public class JoinFaction extends TemplateCommand{
             return true;
         }
 
-        for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction faction = (Faction) mEntry.getValue();
-
+        for (Faction faction : App.factionIOstuff.getFactionList()){
             if (faction.getName().equals(args[0])){
                 App.factionIOstuff.changePlayerFaction(faction, player);
                 player.sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the faction: " + ChatColor.BOLD + faction.getPrefix());

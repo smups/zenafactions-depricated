@@ -157,19 +157,21 @@ public class WarThread {
 
         public void run(){
             //save nu de hashmap
-            try{
-                //stop the timers
-                for (Timer t : tickingTimers) t.cancel();
-
-                FileOutputStream file = new FileOutputStream(war_db);
-                ObjectOutputStream out = new ObjectOutputStream(file);
-                out.writeObject(onGoingWars);
-                out.close();
-                file.close();
-                plugin.getLogger().info(zenfac + "Saved wars");
-            }
-            catch (IOException i){
-                i.printStackTrace();
+            if (onGoingWars != null){
+                try{
+                    //stop the timers
+                    for (Timer t : tickingTimers) t.cancel();
+    
+                    FileOutputStream file = new FileOutputStream(war_db);
+                    ObjectOutputStream out = new ObjectOutputStream(file);
+                    out.writeObject(onGoingWars);
+                    out.close();
+                    file.close();
+                    plugin.getLogger().info(zenfac + "Saved wars");
+                }
+                catch (IOException i){
+                    i.printStackTrace();
+                }
             }
         }
     }
@@ -254,8 +256,8 @@ public class WarThread {
             else return;
 
             for(Map.Entry mEntry : war.getWarzone().entrySet()){
-                int facID = (int) mEntry.getValue();
-                if (facID != victors.getID()) continue;
+                UUID claimerID = (UUID) mEntry.getValue();
+                if (!claimerID.equals(victors.getID())) continue;
                 pChunk pc = (pChunk) mEntry.getKey();
                 App.factionIOstuff.claimChunks(null, pc.getLocation(), victors, null, null);
             }
@@ -320,7 +322,7 @@ public class WarThread {
             return;
         }
 
-        w.addWarzoneChunk(c, f.getID());
+        w.addWarzoneChunk(c, f);
         if (player != null) player.sendMessage(App.zenfac + "added chunk to war demands!");
     }
 

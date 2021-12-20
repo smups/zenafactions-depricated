@@ -43,8 +43,7 @@ public class DeclareWar extends TemplateCommand{
 
         //get defending faction
         Faction defenders = null;;
-        for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction mf = (Faction) mEntry.getValue();
+        for (Faction mf : App.factionIOstuff.getFactionList()){
             if (mf.getName().equals(args[0])) defenders = mf;
         }
 

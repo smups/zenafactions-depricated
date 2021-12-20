@@ -11,10 +11,11 @@ public class ModifyWarpEvent extends Event{
 
     private static final HandlerList hl = new HandlerList();
 
-    private Warp warp;
-    private Faction faction;
-    private Player player;
-    private boolean isAlive;
+    private final Warp warp;
+    private final Faction faction;
+    private final Player player;
+    private final boolean isAlive;
+    private final boolean isNew;
 
     public ModifyWarpEvent(Warp warp, Faction faction, Player player, boolean isAlive){
         super(false); //not async!
@@ -22,6 +23,15 @@ public class ModifyWarpEvent extends Event{
         this.isAlive = isAlive;
         this.faction = faction;
         this.player = player;
+        this.isNew = false;
+    }
+    public ModifyWarpEvent(Warp warp, Faction faction, Player player, boolean isAlive, boolean isNew){
+        super(false);
+        this.warp = warp;
+        this.isAlive = isAlive;
+        this.faction = faction;
+        this.player = player;
+        this.isNew = isNew;
     }
 
     @Override
@@ -45,5 +55,8 @@ public class ModifyWarpEvent extends Event{
     }
     public Player getPlayer(){
         return player;
+    }
+    public boolean isNew(){
+        return isNew;
     }
 }

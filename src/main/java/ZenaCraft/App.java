@@ -80,9 +80,6 @@ public final class App extends JavaPlugin
         // say something to console
         getLogger().info(zenfac + "Loading ZenaFactions...");
 
-        currentVersionTitle = getDescription().getVersion().trim();
-        currentVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
-
         common = new Common();
 
         //check if we are in the EU and have to display a GDPR message
@@ -98,7 +95,7 @@ public final class App extends JavaPlugin
         // Hook into Vault
         if (!setupEconomy()) {
             getLogger().severe(zenfac + "Plugin disabled, no Vault dependency found!");
-            Bukkit.getPluginManager().disablePlugin(this);
+            setEnabled(false);
             return;
         }
         this.setupPermissions();
@@ -108,7 +105,7 @@ public final class App extends JavaPlugin
         // Hook into GP
         if (!setupGP()) {
             getLogger().severe(zenfac + "Plugin disabled, no GriefPrevention dependency found!");
-            Bukkit.getPluginManager().disablePlugin(this);
+            setEnabled(false);
             return;
         }
 
@@ -172,6 +169,7 @@ public final class App extends JavaPlugin
         getCommand("listperms").setExecutor(new ListPerms());
         getCommand("addrankperm").setExecutor(new AddRankPerm());
         getCommand("removerankperm").setExecutor(new RemoveRankPerm());
+        getCommand("listranks").setExecutor(new ListRanks());
 
         //all the ranks are now loaded, so we can create the default ranks:
         Rank lvl1 = new Rank(getConfig().getString("Default Rank name lvl1"));
@@ -191,6 +189,8 @@ public final class App extends JavaPlugin
         warThread = new WarThread(war_db);
 
         //and setup the version checker
+        currentVersionTitle = getDescription().getVersion().trim();
+        currentVersion = Double.valueOf(currentVersionTitle.replaceAll("\\.", ""));
         long hourint = getConfig().getLong("Version check interval");
         t = new Timer();
         t.schedule(new TikTok(), 0, hourint*1000*3600);
@@ -199,16 +199,16 @@ public final class App extends JavaPlugin
     @Override
     public void onDisable() {
         // save factiondb
-        factionIOstuff.saveDB();
+        if (factionIOstuff != null) factionIOstuff.saveDB();
 
         // save wardb
-        warThread.saveDB();
+        if (warThread != null) warThread.saveDB();
 
         //stop updatechecker
-        t.cancel();
+        if (t != null) t.cancel();
 
         //stop perflogger
-        perfThread.disable();
+        if (perfThread != null) perfThread.disable();
         
         //byeeee
         getLogger().info(zenfac + "Byeee");
@@ -233,14 +233,14 @@ public final class App extends JavaPlugin
                 log.warning(App.zenfac + msg);
             }
             else{
-                msg = ChatColor.DARK_GRAY + "Newest version: v" + newVersionTitle + ", current version: " + currentVersionTitle + ", ZenaFactions is up to date!";
+                msg = ChatColor.GRAY + "Newest version: v" + newVersionTitle + ", current version: " + currentVersionTitle + ", ZenaFactions is up to date!";
                 log.info(App.zenfac + msg);
             }
 
             for(OfflinePlayer op : Bukkit.getOperators()){
                 if (!op.isOnline()) continue;
                 Player p = (Player) op.getPlayer();
-                p.sendMessage(App.zenfac + ChatColor.DARK_GRAY + msg);
+                p.sendMessage(App.zenfac + ChatColor.GRAY + msg);
             }
         }
     }

@@ -1,7 +1,6 @@
 package ZenaCraft.commands.financial;
 
 import java.time.Duration;
-import java.util.Map;
 
 import org.bukkit.ChatColor;
 
@@ -24,9 +23,9 @@ public class TakeLoan extends TemplateCommand{
         if(loan == null) return invalidSyntax(player);
         loan--;
 
-        Faction faction = null;;
-        for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction mf = (Faction) mEntry.getValue();
+        Faction faction = null;
+
+        for (Faction mf : App.factionIOstuff.getFactionList()){
             if (mf.getName().equals(args[0])) faction = mf;
         }
 

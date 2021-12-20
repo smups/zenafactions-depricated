@@ -18,7 +18,7 @@ public class RemoveRankPerm extends TemplateCommand{
         for (Rank rank : f.getRanks()) if(rank.getName().equals(args[0])) r = rank;
         if (r == null) return rankNoExist(player, args[0]);
 
-        String perm = args[2];
+        String perm = args[1];
         if(!App.permList.contains(perm)){
             player.sendMessage(App.zenfac + ChatColor.RED + "That permission doesn't exist!");
             return true;

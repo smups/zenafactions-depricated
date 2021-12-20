@@ -21,7 +21,7 @@ public class CreateWarp extends TemplateCommand{
         double warpScale = App.getPlugin(App.class).getConfig().getDouble("warpScale");
         createCost = createCost*Math.pow(faction.getWarpList().size(), warpScale);
 
-        if ((faction.getBalance() < createCost) && (faction.getID() != 0)) return insufficientFactionFunds(player);
+        if ((faction.getBalance() < createCost) && !faction.isDefault()) return insufficientFactionFunds(player);
 
         if (faction.hasWarp(args[0])){
             player.sendMessage(App.zenfac + ChatColor.RED + "This warp already exists!");
@@ -35,9 +35,10 @@ public class CreateWarp extends TemplateCommand{
             return true;
         }
 
-        if (faction.getID() !=0 ) faction.removeBalance(createCost);
+        if (!faction.isDefault()) faction.removeBalance(createCost);
 
         faction.addWarp(player.getLocation(), args[0], player);
+        
         player.sendMessage(App.zenfac + ChatColor.GREEN + "Warp created!");
         player.setMetadata("createWarp", new FixedMetadataValue(App.getPlugin(App.class), false));
     

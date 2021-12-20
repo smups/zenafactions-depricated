@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import ZenaCraft.App;
 import ZenaCraft.commands.TemplateCommand;
+import ZenaCraft.events.PlayerCreateRankEvent;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.Rank;
 
@@ -51,8 +52,14 @@ public class CreateRank extends TemplateCommand{
                 "There already exists a rank with that name!");
             return true;
         }
+
         f.addRank(r);
         player.sendMessage(App.zenfac + "Added rank: " + r.getName());
+        
+        //call event
+        PlayerCreateRankEvent event = new PlayerCreateRankEvent(f, player, r);
+        event.callEvent();
+        
         return true;
     }
 

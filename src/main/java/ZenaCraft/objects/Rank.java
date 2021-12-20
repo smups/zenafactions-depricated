@@ -7,7 +7,7 @@ import java.util.List;
 public class Rank implements Serializable{
     private static final long serialVersionUID = 100L;
 
-    private String name;
+    private final String name;
 
     private int level;
 
@@ -49,9 +49,6 @@ public class Rank implements Serializable{
     public String getName(){
         return name;
     }
-    public void setName(String name){
-        this.name = name;
-    }
     public List<String> getPerms(){
         return perms;
     }
@@ -64,10 +61,12 @@ public class Rank implements Serializable{
     }
     public void addPerm(String perm){
         perms.add(perm);
+        calcLevel();
     }
     public void removePerm(String perm){
         if (!perms.contains(perm)) return;
         perms.remove(perm);
+        calcLevel();
     }
     public int getLevel(){
         return level;

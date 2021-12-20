@@ -25,7 +25,7 @@ public class PlayerJoin implements Listener{
         if (!App.factionIOstuff.isKnownPlayer(player)){
             //Add player to default faction with lowest rank
             //and give him some metadata
-            Faction defaultFaction = App.factionIOstuff.getFaction(0);
+            Faction defaultFaction = App.factionIOstuff.defaultFaction;
 
             if (!player.isOp())
                 App.factionIOstuff.addPlayerToFaction(defaultFaction, player);

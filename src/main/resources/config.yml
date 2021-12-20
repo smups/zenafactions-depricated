@@ -16,7 +16,7 @@ Default Rank name lvl3: Member  #default name for 3rd highest rank
 Currency Symbol: Ƒ #currency symbol used by plugin. (in case you're wondering, the default is the symbol for the old Dutch Guldier :) )
 faction creation cost: 3000.0 #how much money does creating a faction cost?
 deathCost: 3.0 #how much money (per level) does dying cost?
-Banner Price: 10 #how much money does a faction banner cost?
+Banner Price: 10.0 #how much money does a faction banner cost?
 
 #War Settings
 warCost: 10.0 #how much influence does starting a war cost?

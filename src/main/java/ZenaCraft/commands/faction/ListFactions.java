@@ -1,7 +1,5 @@
 package ZenaCraft.commands.faction;
 
-import java.util.Map;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,8 +28,7 @@ public class ListFactions extends TemplateCommand{
     protected boolean run() {
         String response = App.zenfac + "Current factions: ";
 
-        for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
-            Faction value = (Faction) mapElement.getValue();
+        for (Faction value : App.factionIOstuff.getFactionList()){
             int number = value.getMembers().size();
             response += (value.getPrefix() + " (" + String.valueOf(number) + "), \n");
         }

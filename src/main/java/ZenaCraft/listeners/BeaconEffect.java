@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
+import ZenaCraft.objects.FactionQChunk;
 
 public class BeaconEffect implements Listener{
 
@@ -19,10 +20,11 @@ public class BeaconEffect implements Listener{
 
         Chunk c = e.getBlock().getChunk();
 
-        byte[][] FQCData = App.factionIOstuff.getFQC(
+        FactionQChunk fqc = App.factionIOstuff.getFQC(
             App.factionIOstuff.calcFQCName(c.getX(), c.getZ(), null, null)
-        ).getChunkData();
+        );
 
-        if(f.getID() != FQCData[Math.abs(c.getX()) % 100][Math.abs(c.getZ()) % 100]) e.setCancelled(true);
+        if (!f.equals(fqc.getOwner(p.getLocation())))
+            e.setCancelled(true);
     }
 }

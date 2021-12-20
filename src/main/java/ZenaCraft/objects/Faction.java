@@ -22,14 +22,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
+import ZenaCraft.events.ChangeFactionColourEvent;
+import ZenaCraft.events.ChangeFactionNameEvent;
+import ZenaCraft.events.FactionCreateEvent;
+import ZenaCraft.events.LoanCreateEvent;
 import ZenaCraft.events.ModifyWarpEvent;
 
 public class Faction implements Serializable{
     static final long serialVersionUID = 1L;
 
     //Identifiers
-    private final int ID;
+    private UUID uuid;
     private String name;
+    private boolean isDefault;
+
+    //Old ID system
+    private int ID = Integer.MIN_VALUE;
 
     //Attributes
     private double balance;
@@ -59,38 +67,45 @@ public class Faction implements Serializable{
     //deal with outdated warps
     private transient List<Warp> legacywarps;
 
-    public Faction(String Name, Double Balance, Player founder, int newID, Colour newColor){
-        name = Name;
-        balance = Balance;
+    public Faction(String Name, Double Balance, Player founder, Colour newColor){
 
-        //prevent errors - we have no legacy warps!
-        legacywarps = new ArrayList<Warp>();
+        //set all the basic parameters
+        this.uuid = UUID.randomUUID();
+        this.influence = 0;
+        this.colour = newColor;
+        this.name = Name;
+        this.balance = Balance;
+        updatePrefix();
 
         //copy the default ranks
-        faction_ranks = new ArrayList<Rank>();
-        for(Rank defrank : App.defranks) faction_ranks.add(new Rank(defrank));
+        this.faction_ranks = new ArrayList<Rank>();
+        for(Rank defrank : App.defranks) faction_ranks.add(new Rank(defrank, defrank.getName()));
 
-        defaultRank = faction_ranks.get(2);
+        this.defaultRank = faction_ranks.get(2);
 
-        //add the founder
-        member_ranks = new HashMap<UUID, Rank>();
-        if(founder != null) member_ranks.put(founder.getUniqueId(), faction_ranks.get(0));
+        //create member list
+        this.member_ranks = new HashMap<UUID, Rank>();
 
-        influence = 0;
-        ID = newID;
-        colour = newColor;
+        //move the founder into the new faction
+        //critical update!
+        if (founder != null)
+            App.factionIOstuff.changePlayerFaction(this, founder, faction_ranks.get(0));
 
         //financial stuff
         interest = plugin.getConfig().getDouble("default interest");
         loanlength = plugin.getConfig().getInt("default loan length");
 
-        warps = new HashMap<String,Warp>();
-        updatePrefix();
+        this.warps = new HashMap<String,Warp>();
+
+        //call faction creation event
+        FactionCreateEvent event = new FactionCreateEvent(this, founder);
+        event.callEvent();
     }
 
     /*
     Deze override is nodig omdat anders java niet kan bepalen wanneer
-    twee classes hetzelfde zijn, aka hij kan anders deze class niet
+    twee classes hetzelfde zijn, aka hij kan         //Call the faction creation event
+        FactionCreateEvent event = new Facanders deze class niet
     gebruiken als type, en dat willen we wel.
     */
 
@@ -99,32 +114,40 @@ public class Faction implements Serializable{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Faction faction = (Faction) o;
-        if (name != faction.name) return false;
-        if (ID != faction.getID()) return false;
-        return true;
+        return uuid.equals(faction.getID());
     }
 
     @Override
     public int hashCode(){
-        return this.getID();
+        return this.getID().hashCode();
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
-        //first do the deserelisation
+        //first do the deserilisation
         in.defaultReadObject();
 
         //now for the special things
-        if (warps == null) warps = new HashMap<String,Warp>();
-        if (colour == null) colour = new Colour(0xFFFFFF, ChatColor.WHITE);
-        if (loanlength <= 0.01) loanlength = 0.01;
-        if (avaliableLoans == null) avaliableLoans = new ArrayList<AvaliableLoan>();
-        if (runningLoans == null) runningLoans = new ArrayList<Loan>();
+        if (this.warps == null) this.warps = new HashMap<String,Warp>();
+        if (this.colour == null) this.colour = new Colour(0xFFFFFF, ChatColor.WHITE);
+        if (this.loanlength <= 0.01) this.loanlength = 0.01;
+        if (this.avaliableLoans == null) this.avaliableLoans = new ArrayList<AvaliableLoan>();
+        if (this.runningLoans == null) this.runningLoans = new ArrayList<Loan>();
+
+        //compatibility function for builds before 0.1.16
+        if (this.uuid == null){ //
+            this.uuid = UUID.randomUUID();
+
+            Bukkit.getLogger().info(App.zenfac + "Legacy (pre 0.1.16) faction found. Parsing data...");
+            Bukkit.getLogger().info(App.zenfac + "Assigned new ID (" + uuid.toString() + ") to faction: " + prefix);
+
+            if (ID == 0) this.isDefault = true;
+        }
 
         //compatibility function for builds before 0.1.15
         if (ranks != null){
             legacywarps = new ArrayList<Warp>();
 
-            Bukkit.getLogger().info(App.zenfac + "Legacy (pre 0.1.15) factions found. Parsing data...");
+            Bukkit.getLogger().info(App.zenfac + "Legacy (pre 0.1.15) faction found. Parsing data...");
 
             faction_ranks = new ArrayList<Rank>();
             member_ranks = new HashMap<UUID, Rank>();
@@ -154,19 +177,18 @@ public class Faction implements Serializable{
         //if there are new perms, add them to the good ranks!
         for (int i = 0; i < 3; i++){
             Rank frank = faction_ranks.get(i);
-            App.defranks.get(i).getPerms().forEach( (perm) -> {
-                if (!frank.hasPerm(perm)){
-                    frank.addPerm(perm);
-                }                     
-            });
+            for (String perm : App.defranks.get(i).getPerms()){
+                if (!frank.hasPerm(perm)) frank.addPerm(perm);
+            }
         }
     }
 
-    public List<Warp> getLegacyWarps(){
+    public List<Warp> getLegacyWarps(){ 
         return legacywarps;
     }
 
     public boolean hasLegacyWarps(){
+        if (legacywarps == null) return false;
         return !legacywarps.isEmpty();
     }
 
@@ -182,9 +204,20 @@ public class Faction implements Serializable{
     public String getName(){
         return name;
     }
+    
+    public boolean isDefault(){
+        return isDefault;
+    }
+    public void setDefault(boolean isDefault){
+        this.isDefault = isDefault;
+    }
+
     public void setName(String name){
+        String oldName = name;
         this.name = name;
         updatePrefix();
+        ChangeFactionNameEvent event = new ChangeFactionNameEvent(this, oldName, name);
+        event.callEvent();
     }
     public double getBalance(){
         return balance;
@@ -207,10 +240,10 @@ public class Faction implements Serializable{
 
     //members
     public List<Rank> getRanks(){
-        return faction_ranks;
+        return this.faction_ranks;
     }
     public void setRanks(List<Rank> ranks){
-        this.faction_ranks = ranks;
+        faction_ranks = ranks;
     }
     public void addRank(Rank rank){
         faction_ranks.add(rank);
@@ -250,15 +283,21 @@ public class Faction implements Serializable{
     public String getPrefix(){
         return prefix;
     }
-    public int getID(){
+    public UUID getID(){
+        return uuid;
+    }
+    public int getOldID(){
         return ID;
     }
     public Colour getColour(){
         return colour;
     }
     public void setColour(Colour c){
+        Colour oldColour = new Colour(this.colour);
         this.colour = c;
         updatePrefix();
+        ChangeFactionColourEvent event = new ChangeFactionColourEvent(this, oldColour, c);
+        event.callEvent();
     }
 
     //warpstuff
@@ -285,13 +324,16 @@ public class Faction implements Serializable{
     @Nullable
     public void addWarp(Location location, String name, Player player){
         Warp w = new Warp(location, name);
-        ModifyWarpEvent e = new ModifyWarpEvent(w, this, player, true);
         warps.put(name, w);
-        e.callEvent();
 
         //give all ranks permission
         for (Rank r : faction_ranks) r.addPerm(w.getPerm());
+
+        //trhow the event
+        ModifyWarpEvent e = new ModifyWarpEvent(w, this, player, true);
+        e.callEvent();
     }
+
     public boolean hasWarp(String name){
         return warps.containsKey(name);
     }
@@ -321,6 +363,8 @@ public class Faction implements Serializable{
     public AvaliableLoan createLoan(double amount){
         AvaliableLoan l = new AvaliableLoan(this, amount);
         avaliableLoans.add(l);
+        LoanCreateEvent event = new LoanCreateEvent(this, l);
+        event.callEvent();
         return l;
     }
     public void deleteLoan(Loan l){
