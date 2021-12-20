@@ -1,8 +1,5 @@
 package ZenaCraft.events;
 
-import java.util.Map;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,11 +7,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
@@ -38,7 +30,7 @@ public class PlayerJoin implements Listener{
                 //Add player to default faction with lowest rank
                 //and give him some metadata
                 Faction defaultFaction = App.factionIOstuff.getFaction(0);
-                int rank = 3;
+                int rank = 2;
                 if (player.isOp()) rank = 0;
                 App.factionIOstuff.addPlayerToFaction(defaultFaction, player, rank);
                 player.setMetadata("faction", new FixedMetadataValue(plugin, defaultFaction.getName()));
@@ -61,25 +53,7 @@ public class PlayerJoin implements Listener{
         }
 
         //Here comes the Scoreboard stuff
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        Scoreboard board = manager.getMainScoreboard();
-        Objective objective;
-
-        if (board.getObjective(DisplaySlot.SIDEBAR) == null){
-            objective = board.registerNewObjective("test", "dummy", ChatColor.BOLD + "Faction Influence");
-        }
-        else{
-            objective = board.getObjective(DisplaySlot.SIDEBAR);        
-        }
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-        for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
-            Faction value = (Faction) mapElement.getValue();
-            Score score = objective.getScore(value.getPrefix());
-            score.setScore( (int) value.getInfluence());
-        }
-
-        player.setScoreboard(board);
+        App.factionIOstuff.reloadScoreBoard(player);
 
         //here comes the chunk stuff
         App.factionIOstuff.loadFQC(player, null);

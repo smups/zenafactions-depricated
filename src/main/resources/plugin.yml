@@ -1,8 +1,8 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.5.3
+version: 0.1.7
 api-version: 1.16
-depend: ["Vault", "dynmap"]
+depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
   listFactions:
     description: lists the current server factions
@@ -31,3 +31,12 @@ commands:
   toggleAutoClaim:
     description: toggles autoclaiming of unclaimed chunks for your faction
     usage: /<command> [autoclaiming radius]
+  listMembers:
+    description: lists faction members
+    usage: /<command>
+  setInfluence:
+    description: sets faction influence
+    usage: /<command> [faction] [influence]
+  joinFaction:
+    description: leave your current faction and join a new one in the lowest rank
+    usage: /<command> [faction]

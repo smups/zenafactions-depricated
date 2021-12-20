@@ -60,10 +60,19 @@ public final class App extends JavaPlugin
         //this.setupChat();
         getLogger().info("Hooked into Vault!");
 
+        //Hook into GP
+        if (!setupGP()){
+            getLogger().severe("Plugin disabled, no GriefPrevention dependency found!");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return; 
+        }
+
         //Events
         pm.registerEvents(new PlayerJoin(), this);
         pm.registerEvents(new PlayerLeave(), this);
         pm.registerEvents(new PlayerMove(), this);
+        pm.registerEvents(new PlayerChat(), this);
+        pm.registerEvents(new CreateClaim(), this);
 
         //Commands
         getCommand("listFactions").setExecutor(new listFactions());
@@ -75,6 +84,9 @@ public final class App extends JavaPlugin
         getCommand("listLoadedFQChunks").setExecutor(new listLoadedFQChunks());
         getCommand("claimChunk").setExecutor(new claimChunk());
         getCommand("toggleAutoClaim").setExecutor(new toggleAutoClaim());
+        getCommand("listMembers").setExecutor(new listMembers());
+        getCommand("setInfluence").setExecutor(new setInfluence());
+        getCommand("joinFaction").setExecutor(new joinFaction());
 
         //Hook into Dynmap
         if (!setupMap()){
@@ -114,13 +126,17 @@ public final class App extends JavaPlugin
 
     private boolean setupChat() {
         RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
+        if (perms == null) {
+            getLogger().severe("No Chatprovider found, please install one");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return false;
+        }
         chat = rsp.getProvider();
         return chat != null;
     }
 
     private boolean setupPermissions() {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
         return perms != null;
     }
 
@@ -146,6 +162,12 @@ public final class App extends JavaPlugin
         else{
             markerSet = dapi.getMarkerAPI().getMarkerSet("ZenaFactions.Factions.Territory");
         }
+        return true;
+    }
+
+    private boolean setupGP(){
+        //no GP installed
+        if (Bukkit.getPluginManager().getPlugin("GriefPrevention") == null) return false;
         return true;
     }
 

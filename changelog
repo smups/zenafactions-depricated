@@ -50,3 +50,12 @@ ZenaFactions Plugin Changelog
 -added radius option to claimChunk
 -added radius option to autoclaiming
 
+0.1.6
+-Added prefixes for factions in chat
+-Fixed bug with join prefix not showing correct color
+
+0.1.7
+-Fixed bunch of bugs with FQC's
+-added listMembers, setInfluence and joinFaction commands
+-players may now join any faction as junior rank
+-changed some default values

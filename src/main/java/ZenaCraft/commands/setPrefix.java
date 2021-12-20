@@ -69,7 +69,8 @@ public class setPrefix implements CommandExecutor{
         newPrefix += name;
 
         faction.setPrefix(newPrefix);
-        player.sendMessage(App.zenfac + "new prefix set as: " + newPrefix + "[" + color + "]");
+        player.sendMessage(App.zenfac + "new prefix set as: " + newPrefix + " [" + color + "]");
+        App.factionIOstuff.reloadScoreBoard(null);
         return true;
     }
     

@@ -18,6 +18,11 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.dynmap.markers.AreaMarker;
 
 import ZenaCraft.App;
@@ -90,6 +95,25 @@ public class FactionIOstuff {
     public Faction getPlayerFaction(Player player){
         if (!isKnownPlayer(player)) return null;
         return factionHashMap.get(playerHashMap.get(player.getUniqueId()));
+    }
+    public String getPlayerPrefix(Player player){
+        return getPlayerFaction(player).getPrefix();
+    }
+    public String getPlayerRank(Player player){
+        int rankInt = getPlayerFaction(player).getMembers().get(player.getUniqueId());
+        return getPlayerFaction(player).getRanks()[rankInt];
+    }
+    public void changePlayerFaction(Faction newFaction, Player player, int rank){
+        Faction oldFaction = getPlayerFaction(player);
+        double player_influence = plugin.getConfig().getDouble("influence per player");
+
+        oldFaction.removeMember(player.getUniqueId());
+        oldFaction.setInfluence(oldFaction.getInfluence() - player_influence);
+        newFaction.setInfluence(newFaction.getInfluence() + player_influence);
+        newFaction.addMember(player.getUniqueId(), rank);
+
+        addFaction(newFaction);
+        playerHashMap.replace(player.getUniqueId(), newFaction.getID());
     }
 
     //Factions
@@ -178,6 +202,18 @@ public class FactionIOstuff {
         new SaveDB();
     }
 
+    @Nullable
+    public String calcFQCName(int ChunkX, int ChunkZ, Byte offsetX, Byte offsetZ){
+        int FQCX = ChunkX/100;
+        int FQCZ = ChunkZ/100;
+        if (ChunkX < 0) FQCX -= 1;
+        if (ChunkZ < 0) FQCZ -= 1;
+        if (offsetX != null) FQCX += (int) offsetX;
+        if (offsetZ != null) FQCZ += (int) offsetZ;
+
+        return "X" + String.valueOf(FQCX) + "Z" + String.valueOf(FQCZ);
+    }
+
     private class ClaimChunks implements Runnable{
         /*
             Laadt de FQC chunks rondom de player:
@@ -223,6 +259,11 @@ public class FactionIOstuff {
         public void run(){
             Chunk chunk = location.getChunk();
 
+            byte playerFaction = player.getMetadata("factionID").get(0).asByte();
+            if (factionHashMap.get((int) playerFaction).getMembers().get(player.getUniqueId()) > 1){
+                player.sendMessage(zenfac + ChatColor.RED + "You don't have to appropriate rank to do this! You have to be at least: " + ChatColor.GREEN + factionHashMap.get((int) playerFaction).getRanks()[1]);
+            }
+
             for (int i = -1*radius; i <= radius; i++){
                 for (int j = -1*radius; j<= radius; j++){
                     int chunkX = chunk.getX();
@@ -232,7 +273,8 @@ public class FactionIOstuff {
                     if (i*i + j*j >= radius*radius) continue;
                     chunkX += i;
                     chunkZ += j;
-                    String FQCName = "X" + String.valueOf(chunkX/100) + "Z" + String.valueOf(chunkZ/100);
+                    String FQCName = calcFQCName(chunkX, chunkZ, null, null);
+                    Bukkit.getLogger().info("Chunk [" + String.valueOf(chunkX) + "," + String.valueOf(chunkZ) + "] in claimed in FQC: " + FQCName + "@[" + String.valueOf(Math.abs(chunkX % 100)) + "," + String.valueOf(Math.abs(chunkZ % 100)) + "]");
                     byte[][] chunkData = getFQC(FQCName).getChunkData();
                     int ownerID = chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)];
 
@@ -243,8 +285,21 @@ public class FactionIOstuff {
                     }
 
                     //if it is, claim it!
-                    byte playerFaction = player.getMetadata("factionID").get(0).asByte();
+
+                    //check if faction has enough influence to claim the chunk
+                    double claimCost = plugin.getConfig().getDouble("Claim Influence Cost");
+                    double oldBalance = factionHashMap.get((int) playerFaction).getInfluence();
+
+                    if (oldBalance < claimCost){
+                        player.sendMessage(zenfac + ChatColor.DARK_RED + "Not enough faction influence to claim chunk!");
+                        continue;
+                    }
+
                     chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)] = playerFaction;
+                    factionHashMap.get((int) playerFaction).setInfluence(oldBalance - claimCost);
+
+                    //update scoreboard
+                    reloadScoreBoard(null);
 
                     //now do the dynmap thingies
                     int color = factionHashMap.get((int) playerFaction).getColor();
@@ -260,6 +315,34 @@ public class FactionIOstuff {
     @Nullable
     public void claimChunks(Player player_, Location location_, Integer radius_, Thread waitThread){
         new ClaimChunks(player_, location_, radius_, waitThread);
+    }
+
+    @Nullable
+    public void reloadScoreBoard(Player player){
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        Scoreboard board = manager.getMainScoreboard();
+        Objective objective;
+
+        if (board.getObjective(DisplaySlot.SIDEBAR) == null){
+            objective = board.registerNewObjective("test", "dummy", ChatColor.BOLD + "Faction Influence");
+        }
+        else{
+            objective = board.getObjective(DisplaySlot.SIDEBAR); 
+        }
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        for (Map.Entry mapElement : App.factionIOstuff.getFactionList().entrySet()){
+            Faction value = (Faction) mapElement.getValue();
+            Score score = objective.getScore(value.getPrefix());
+            score.setScore( (int) value.getInfluence());
+        }
+
+        if (player != null) player.setScoreboard(board);
+        else {
+            for (Player p : Bukkit.getOnlinePlayers()){
+                p.setScoreboard(board);
+            }
+        }
     }
 
     private class LoadFQC implements Runnable{
@@ -300,7 +383,7 @@ public class FactionIOstuff {
                 int X = location.getChunk().getX();
                 int Z = location.getChunk().getZ();
         
-                String fQchunkName = "X" + String.valueOf(X/100 + offset[0]) + "Z" + String.valueOf(Z/100 + offset[1]);
+                String fQchunkName = calcFQCName(X, Z, offset[0], offset[1]);
 
                 //If the FQC is already loaded, add player to online player list and continue
                 if (loadedFQChunks.containsKey(fQchunkName)){
@@ -358,7 +441,7 @@ public class FactionIOstuff {
                 int X = location.getChunk().getX();
                 int Z = location.getChunk().getZ();
         
-                String fQchunkName = "X" + String.valueOf(X/100 + offset[0]) + "Z" + String.valueOf(Z/100 + offset[1]);
+                String fQchunkName = calcFQCName(X, Z, offset[0], offset[1]);
 
                 //If the FQC is already unloaded, continue
                 if (!loadedFQChunks.containsKey(fQchunkName)) continue;

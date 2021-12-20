@@ -26,8 +26,8 @@ public class PlayerMove implements Listener{
 
         //Check of de player naar een nieuwe chunk is gelopen
         if (oldChunk.getX() != newChunk.getX() || oldChunk.getZ() != newChunk.getZ()){
-            String oldFQCName = "X" + String.valueOf(oldChunk.getX()/100) + "Z" + String.valueOf(oldChunk.getZ()/100);
-            String newFQCName = "X" + String.valueOf(newChunk.getX()/100) + "Z" + String.valueOf(newChunk.getZ()/100);
+            String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
+            String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);
 
             //Check of de player naar een nieuwe FQC is gelopen
             if(!oldFQCName.equals(newFQCName)){
@@ -115,8 +115,8 @@ public class PlayerMove implements Listener{
             Chunk newChunk = newLocation.getChunk();
             Chunk oldChunk = oldLocation.getChunk();
 
-            String oldFQCName = "X" + String.valueOf(oldChunk.getX()/100) + "Z" + String.valueOf(oldChunk.getZ()/100);
-            String newFQCName = "X" + String.valueOf(newChunk.getX()/100) + "Z" + String.valueOf(newChunk.getZ()/100);
+            String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
+            String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);
 
             byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
             byte newOwnerID = App.factionIOstuff.getFQC(newFQCName).getChunkData()[Math.abs(newChunk.getX()) % 100][Math.abs(newChunk.getZ()) % 100];

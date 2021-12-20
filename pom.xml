@@ -6,7 +6,7 @@
 
   <groupId>ZenaCraft</groupId>
   <artifactId>ZenaFactions</artifactId>
-  <version>0.1.5.3-SNAPSHOT</version>
+  <version>0.1.7-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
@@ -62,6 +62,13 @@
       <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+	    <groupId>com.github.TechFortress</groupId>
+	    <artifactId>GriefPrevention</artifactId>
+      <version>16.17.0</version>
+      <scope>provided</scope>
+	</dependency>
   </dependencies>
 
   <build>
