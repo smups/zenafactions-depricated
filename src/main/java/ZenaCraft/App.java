@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -156,6 +155,7 @@ public final class App extends JavaPlugin
         getCommand("myloans").setExecutor(new MyLoans());
         getCommand("buyfactionbanner").setExecutor(new BuyFactionBanner());
         getCommand("changefactionbanner").setExecutor(new ChangeFactionBanner());
+        getCommand("lognow").setExecutor(new LogNow());
 
         // all the way at the end we setup the war database
         warThread = new WarThread(war_db);
@@ -208,7 +208,8 @@ public final class App extends JavaPlugin
 
             if (newVersion > currentVersion){
                msg = "New version: v" + newVersionTitle + " found!" + 
-                " Please update your ZenaFactions Install!";
+                " Please update your ZenaFactions Install! You can download the new version from: " +
+                "https://dev.bukkit.org/projects/zenafactions/files/latest";
                 log.warning(App.zenfac + msg);
             }
             else{

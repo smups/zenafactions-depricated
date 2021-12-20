@@ -28,7 +28,11 @@ public class Common {
     ChatColor.RED + " If you are a server operator and did not expect this message, please take a look" +
     " at the ZenaFactions config files. Thank you!";
 
-	// Messages
+    // Messages
+    public boolean opCommand(Player player){
+        player.sendMessage(App.zenfac + ChatColor.RED + "Admin command only!");
+        return true;
+    }
     public boolean invalidSyntax(Player player) {
         player.sendMessage(App.zenfac + ChatColor.RED + "Invalid Syntax! Use /help zenafactions for help");
         return true;

@@ -256,6 +256,9 @@ features:
 - restricted /claimchunk and /toggleautoclaiming to a radius of max 10 chunks
 
 0.1.14.2
+features:
+- added /lognow command to log files immediatly
 bugfixes:
 - fixed bug with loan timer crashing if loans expire while player offline
 - improved compatibility (known issues with TheNewEconomy): jar now includes shaded dependencies, resolving duplicate dependency conflicts
+- solved issue with certain dependencies straight up missing from the last jar file

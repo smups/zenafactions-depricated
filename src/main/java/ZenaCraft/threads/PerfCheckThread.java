@@ -98,4 +98,11 @@ public class PerfCheckThread {
         t.cancel();
         save();
     }
+
+    public void interrupt(){
+        t.cancel();
+        save();
+        t = new Timer();
+        t.schedule(new SaveDat(), 1000*3600);
+    }
 }

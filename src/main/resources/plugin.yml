@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.14.1
+version: 0.1.14.2
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -105,4 +105,7 @@ commands:
     usage: </command>
   buyfactionbanner:
     description: buys you a copy of your faction's banner (if your faction has one)
+    usage: </command>
+  lognow:
+    description: dumps log files right now
     usage: </command>

@@ -102,6 +102,10 @@ public class TemplateCommand implements CommandExecutor{
         return common.noMember(player);
     }
 
+    protected boolean opCommand(Player player){
+        return common.opCommand(player);
+    }
+
     protected Double formatDouble(String st){
         return common.formatDouble(st, player);
     }
