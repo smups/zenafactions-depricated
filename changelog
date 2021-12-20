@@ -40,7 +40,13 @@ ZenaFactions Plugin Changelog
 -fixed a whole load of bugs
 
 0.1.5.2
-Lines of code: 1369
 -added dynmap support for faction terretory
 -rework of chunk claiming function
 -had to rework EVERY SINGLE FILE
+
+0.1.5.3
+-readded title popUp system
+-readded autoclaiming system
+-added radius option to claimChunk
+-added radius option to autoclaiming
+

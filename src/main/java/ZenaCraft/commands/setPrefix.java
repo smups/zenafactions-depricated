@@ -30,11 +30,42 @@ public class setPrefix implements CommandExecutor{
 
         String newPrefix = "";
 
-        if (color.equals(new String("red"))) newPrefix += ChatColor.DARK_RED;
-        if (color.equals(new String("green"))) newPrefix += ChatColor.GREEN;
-        if (color.equals(new String("blue"))) newPrefix += ChatColor.BLUE;
-        if (color.equals(new String("purple"))) newPrefix += ChatColor.DARK_PURPLE;
-        if (color.equals(new String("orange"))) newPrefix += ChatColor.GOLD;
+        if (color.equals(new String("red"))){
+            newPrefix += ChatColor.DARK_RED;
+            faction.setColor(0xFF5555);
+        }
+        if (color.equals(new String("green"))){
+            newPrefix += ChatColor.GREEN;
+            faction.setColor(0x55FF55);
+        }
+        if (color.equals(new String("blue"))){
+            newPrefix += ChatColor.BLUE;
+            faction.setColor(0x5555FF);
+        }
+        if (color.equals(new String("dark red"))){
+            newPrefix += ChatColor.DARK_RED;
+            faction.setColor(0xAA0000);
+        }
+        if (color.equals(new String("dark green"))){
+            newPrefix += ChatColor.DARK_GREEN;
+            faction.setColor(0x00AA00);
+        }
+        if (color.equals(new String("dark blue"))){
+            newPrefix += ChatColor.DARK_BLUE;
+            faction.setColor(0x0000AA);
+        }
+        if (color.equals(new String("purple"))){
+            newPrefix += ChatColor.LIGHT_PURPLE;
+            faction.setColor(0xFF55FF);
+        }
+        if (color.equals(new String("dark purple"))){
+            newPrefix += ChatColor.DARK_PURPLE;
+            faction.setColor(0xAA00AA);
+        }
+        if (color.equals(new String("orange"))){
+            newPrefix += ChatColor.GOLD;
+            faction.setColor(0xFFAA00);
+        }
         newPrefix += name;
 
         faction.setPrefix(newPrefix);

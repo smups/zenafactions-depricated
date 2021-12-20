@@ -55,7 +55,7 @@ public class createFaction implements CommandExecutor{
         String[] defaultRanks = {"Founder", "Bigshot", "Member"};
         String prefix = new String(name);
         int newID = (int) App.factionIOstuff.getFactionList().size();
-        Faction newFaction = new Faction(name, defaultRanks, faction_cost, founder, prefix, newID);
+        Faction newFaction = new Faction(name, defaultRanks, faction_cost, founder, prefix, newID, 0xFFFFFF);
 
         int oldID = player.getMetadata("factionID").get(0).asInt();
         Faction oldFaction = (Faction) App.factionIOstuff.getFaction(oldID);

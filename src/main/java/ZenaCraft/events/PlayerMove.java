@@ -1,6 +1,6 @@
 package ZenaCraft.events;
 
-import java.util.Map;
+import javax.annotation.Nullable;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -9,8 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.dynmap.markers.AreaMarker;
-import org.dynmap.markers.MarkerSet;
 
 import ZenaCraft.App;
 
@@ -34,8 +32,28 @@ public class PlayerMove implements Listener{
             //Check of de player naar een nieuwe FQC is gelopen
             if(!oldFQCName.equals(newFQCName)){
                 player.sendMessage("Moved from: " + oldFQCName + " to: " + newFQCName);
-                new MovedFQC(player, oldLocation, newLocation);
+                //IOstuff + autoclaiming
+                MovedFQC movedFQC = new MovedFQC(player, oldLocation, newLocation);
+                autoClaimFunc(movedFQC.getThread(), player, newLocation);
             }
+            //Niet naar een nieuwe FQC dus
+            else{
+                byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
+                byte newOwnerID = App.factionIOstuff.getFQC(newFQCName).getChunkData()[Math.abs(newChunk.getX()) % 100][Math.abs(newChunk.getZ()) % 100];
+                if (oldOwnerID != newOwnerID){
+                    if (newOwnerID == -1) player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
+                    else player.sendTitle("Entering: " + App.factionIOstuff.getFaction(newOwnerID).getPrefix(), "", 10, 35, 20);
+                }
+                //Code voor autoclaiming
+                autoClaimFunc(null, player, newLocation);
+            }
+        }
+    }
+
+    @Nullable
+    private void autoClaimFunc(Thread waitThread, Player player, Location newLocation){
+        if (player.getMetadata("autoClaiming").get(0).asBoolean()){
+            App.factionIOstuff.claimChunks(player, newLocation, player.getMetadata("autoClaimingRadius").get(0).asInt(), waitThread);
         }
     }
 
@@ -72,8 +90,15 @@ public class PlayerMove implements Listener{
             catch (Exception e){
                 e.printStackTrace();
             }
-            //laad nu de nieuwe benodigde threads
-            App.factionIOstuff.loadFQC(player, newLocation);
+            //laad nu de nieuwe FQC's
+            try{
+                //Wacht totdat ze geladen zijn
+                App.factionIOstuff.loadFQC(player, newLocation).join();;
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+            
             /*
                 Okay dit is nog steeds suboptimaal: je zou een rare bug
                 kunnen krijgen als een speler te snel van chunk wisselt
@@ -85,32 +110,22 @@ public class PlayerMove implements Listener{
 
                 Te lui om dit te fixen tho.
             */
+
+            //Deze code doet niks anders dan fucking titels sturen
+            Chunk newChunk = newLocation.getChunk();
+            Chunk oldChunk = oldLocation.getChunk();
+
+            String oldFQCName = "X" + String.valueOf(oldChunk.getX()/100) + "Z" + String.valueOf(oldChunk.getZ()/100);
+            String newFQCName = "X" + String.valueOf(newChunk.getX()/100) + "Z" + String.valueOf(newChunk.getZ()/100);
+
+            byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
+            byte newOwnerID = App.factionIOstuff.getFQC(newFQCName).getChunkData()[Math.abs(newChunk.getX()) % 100][Math.abs(newChunk.getZ()) % 100];
+
+            if (oldOwnerID != newOwnerID){
+                if (newOwnerID == -1) player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
+                else player.sendTitle("Entering: " + App.factionIOstuff.getFaction(newOwnerID).getPrefix(), "", 10, 35, 20);
+            }
+
         }
     }
-    
-/*
-    private boolean claimChunkMethod(Location location, Player player){
-        Chunk chunk = location.getChunk();
-        MarkerSet markerSet = App.getMarkerSet();
-        String fQCName = "X" + String.valueOf(chunk.getX()/100) + "Z" + String.valueOf(chunk.getZ()/100);
-
-        FactionQChunk fQC = App.loadedFQChunks.get(fQCName);
-        byte[][] chunkData = fQC.getChunkData();
-        int ownerID = chunkData[Math.abs(chunk.getX() % 100)][Math.abs(chunk.getZ() % 100)];
-
-        if (ownerID != -1){
-            player.sendMessage(App.zenfac + ChatColor.DARK_RED + "This chunk is already claimed!");
-            return false;
-        }
-        chunkData[Math.abs(chunk.getX() % 100)][Math.abs(chunk.getZ() % 100)] = player.getMetadata("factionID").get(0).asByte();
-
-        //do the dynmap stuff
-        AreaMarker marker = markerSet.createAreaMarker(String.valueOf(chunk.getX()) + String.valueOf(chunk.getZ()), player.getMetadata("faction").get(0).asString(), true, player.getWorld().getName(), new double[] {chunk.getX()*16, chunk.getX()*16 + 16}, new double[] {chunk.getZ()*16, chunk.getZ()*16 + 16}, true);
-        marker.setFillStyle(0.1, 0x42f4f1);
-        marker.setLineStyle(1, 0.2, 0x42f4f1);
-        player.sendMessage(App.zenfac + "Chunk Claimed!");
-
-        return true;
-    }
-*/
 }

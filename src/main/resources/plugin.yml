@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.5.2
+version: 0.1.5.3
 api-version: 1.16
 depend: ["Vault", "dynmap"]
 commands:
@@ -27,7 +27,7 @@ commands:
     usage: /<command>
   claimChunk:
     description: claims chunk for your faction
-    usage: /<command>
+    usage: /<command> [radius]
   toggleAutoClaim:
     description: toggles autoclaiming of unclaimed chunks for your faction
-    usage: /<command>
+    usage: /<command> [autoclaiming radius]

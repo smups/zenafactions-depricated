@@ -14,9 +14,11 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.dynmap.markers.AreaMarker;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
@@ -174,6 +176,90 @@ public class FactionIOstuff {
     //Method om deze class te starten
     public void saveDB(){
         new SaveDB();
+    }
+
+    private class ClaimChunks implements Runnable{
+        /*
+            Laadt de FQC chunks rondom de player:
+            chunks worden in een vierkant om de speler
+            heen geladen.
+        */
+        private Thread t;
+        private Player player;
+        private Location location;
+        private Integer radius;
+
+        @Nullable
+        public ClaimChunks(Player player_, Location location_, Integer radius_, Thread waitThread){
+            player = player_;
+            if (location_ != null) location = location_;
+            else location = player.getLocation();
+            if (radius_ != null) radius = radius_;
+            else radius = 1;
+
+            this.start();
+
+            if (waitThread != null){
+                try{
+                    waitThread.join();
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public Thread getThread(){
+            return this.t;
+        }
+
+        public void start(){
+            if (t == null){
+                t = new Thread(this);
+                t.start();
+            }
+        }
+
+        public void run(){
+            Chunk chunk = location.getChunk();
+
+            for (int i = -1*radius; i <= radius; i++){
+                for (int j = -1*radius; j<= radius; j++){
+                    int chunkX = chunk.getX();
+                    int chunkZ = chunk.getZ();
+
+                    //Check if points within circle
+                    if (i*i + j*j >= radius*radius) continue;
+                    chunkX += i;
+                    chunkZ += j;
+                    String FQCName = "X" + String.valueOf(chunkX/100) + "Z" + String.valueOf(chunkZ/100);
+                    byte[][] chunkData = getFQC(FQCName).getChunkData();
+                    int ownerID = chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)];
+
+                    //Check if the chunk is avaliable
+                    if (ownerID != -1){
+                        player.sendMessage(zenfac + ChatColor.DARK_RED + "This chunk is already claimed!");
+                        continue;
+                    }
+
+                    //if it is, claim it!
+                    byte playerFaction = player.getMetadata("factionID").get(0).asByte();
+                    chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)] = playerFaction;
+
+                    //now do the dynmap thingies
+                    int color = factionHashMap.get((int) playerFaction).getColor();
+                    AreaMarker marker = App.getMarkerSet().createAreaMarker(String.valueOf(chunkX) + String.valueOf(chunkZ), player.getMetadata("faction").get(0).asString(), true, player.getWorld().getName(), new double[] {chunkX*16, chunkX*16 + 16}, new double[] {chunkZ*16, chunkZ*16 + 16}, true);
+                    marker.setFillStyle(0.1, color);
+                    marker.setLineStyle(1, 0.2, color);
+                    player.sendMessage(zenfac + "Chunk Claimed!");
+                }
+            }
+        }
+    }
+    //Method om deze class te starten
+    @Nullable
+    public void claimChunks(Player player_, Location location_, Integer radius_, Thread waitThread){
+        new ClaimChunks(player_, location_, radius_, waitThread);
     }
 
     private class LoadFQC implements Runnable{
@@ -368,8 +454,8 @@ public class FactionIOstuff {
     
                     HashMap<UUID, Integer> dummyHashMap = new HashMap<UUID, Integer>();
                     String[] defaultRanks = {"Admin", "Staff", "New Player"};
-                    Faction defaultFaction = new Faction(default_fname, defaultRanks, 0.0, dummyHashMap, ChatColor.AQUA + default_fname, 0);
-    
+                    Faction defaultFaction = new Faction(default_fname, defaultRanks, 0.0, dummyHashMap, ChatColor.AQUA + default_fname, 0, 0x55FFFF);
+
                     factionHashMap.put(0, defaultFaction);
     
                     out.writeObject(factionHashMap);

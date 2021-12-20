@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +18,6 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import ZenaCraft.App;
 import ZenaCraft.objects.Faction;
-import ZenaCraft.objects.FactionQChunk;
 
 public class PlayerJoin implements Listener{
     //This file checks on join if the player has metadata corresponding to membership of a new faction
@@ -89,6 +87,9 @@ public class PlayerJoin implements Listener{
         //setAutoclaimingMetadata
         if (!player.hasMetadata("autoClaiming")){
             player.setMetadata("autoClaiming", new FixedMetadataValue(plugin, false));
+        }
+        if (!player.hasMetadata("autoClaimingRadius")){
+            player.setMetadata("autoClaimingRadius", new FixedMetadataValue(plugin, 0));
         }
     }
 }

@@ -12,8 +12,9 @@ public class Faction implements Serializable{
     HashMap<UUID,Integer> members;
     String prefix;
     int ID;
+    int color;
 
-    public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, String Prefix, int newID){
+    public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, String Prefix, int newID, int newColor){
         name = Name;
         ranks = Ranks;
         balance = Balance;
@@ -21,6 +22,7 @@ public class Faction implements Serializable{
         prefix = Prefix;
         influence = 0;
         ID = newID;
+        color = newColor;
     }
 
     /*
@@ -86,5 +88,11 @@ public class Faction implements Serializable{
     }
     public int getID(){
         return ID;
+    }
+    public int getColor(){
+        return color;
+    }
+    public void setColor(int newColor){
+        this.color = newColor;
     }
 }
