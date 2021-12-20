@@ -14,6 +14,7 @@ public class AsyncFQCChangeEvent extends Event{
     private Faction f;
 
     public AsyncFQCChangeEvent(FactionQChunk fqc, Faction f){
+        super(true); //async!
         this.fqc = fqc;
         this.f = f;
     }
@@ -23,7 +24,7 @@ public class AsyncFQCChangeEvent extends Event{
         return hl;
     }
 
-    public static HandlerList gHandlerList(){
+    public static HandlerList getHandlerList(){
         return hl;
     }
 

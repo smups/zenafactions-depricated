@@ -7,10 +7,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map.Entry;
+
+import ZenaCraft.objects.loans.*;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.plugin.Plugin;
+
+import ZenaCraft.App;
+import ZenaCraft.events.ModifyWarpEvent;
 
 public class Faction implements Serializable{
     static final long serialVersionUID = 1L;
@@ -26,6 +35,15 @@ public class Faction implements Serializable{
     private String prefix;
     private Colour colour;
     private HashMap<String,Warp> warps;
+    private BannerMeta bm;
+
+    //financial stuff
+    private double interest;
+    private int loanlength;
+    private List<Loan> runningLoans = new ArrayList<Loan>();
+    private List<AvaliableLoan> avaliableLoans = new ArrayList<AvaliableLoan>();
+
+    Plugin plugin = App.getPlugin(App.class);
 
     public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, int newID, Colour newColor){
         name = Name;
@@ -35,6 +53,10 @@ public class Faction implements Serializable{
         influence = 0;
         ID = newID;
         colour = newColor;
+
+        //financial stuff
+        interest = plugin.getConfig().getDouble("default interest");
+        loanlength = plugin.getConfig().getInt("default loan length");
 
         warps = new HashMap<String,Warp>();
         updatePrefix();
@@ -149,15 +171,61 @@ public class Faction implements Serializable{
         return warps.get(name);
     }
     public void removeWarp(String name){
+        ModifyWarpEvent e = new ModifyWarpEvent(warps.get(name), this, false);
         warps.remove(name);
+        e.callEvent();
     }
     public void deleteWarps(){
+        for (Entry m : warps.entrySet()){
+            ModifyWarpEvent e = new ModifyWarpEvent((Warp) m.getValue(), this, false);
+            e.callEvent();
+        }
         warps.clear();
     }
     public void addWarp(Location location, String name){
-        warps.put(name, new Warp(location, name));
+        Warp w = new Warp(location, name);
+        ModifyWarpEvent e = new ModifyWarpEvent(w, this, true);
+        warps.put(name, w);
+        e.callEvent();
     }
     public boolean hasWarp(String name){
         return warps.containsKey(name);
+    }
+    public void setBanner(ItemStack is){
+    }
+    //Loans
+    public List<Loan> getRunningLoans(){
+        return runningLoans;
+    }
+    public List<AvaliableLoan> getAvaliableLoans(){
+        return avaliableLoans;
+    }
+    public List<Loan> getPlayerLoans(Player p){
+        List<Loan> resp = new ArrayList<Loan>();
+
+        for(Loan l : runningLoans){
+            if (l.getPlayer().equals(p)) resp.add(l);
+        }
+
+        return resp;
+    }
+    public void assignLoan(Player p, AvaliableLoan l){
+        avaliableLoans.remove(l);
+        runningLoans.add(new Loan(l, p));
+    }
+    public void createLoan(double amount){
+        avaliableLoans.add(new AvaliableLoan(this, amount));
+    }
+    public int getLoanLength(){
+        return loanlength;
+    }
+    public void setLoanLength(int loanlength){
+        this.loanlength = loanlength;
+    }
+    public double getInterest(){
+        return interest;
+    }
+    public void setInterest(double interest){
+        this.interest = interest;
     }
 }

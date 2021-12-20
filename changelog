@@ -19,7 +19,7 @@ ZenaFactions Plugin Changelog
 -Added Vault support
 -Added config file
 -factions now cost money to create
--factions now start off with faction_creation_cost in money\
+-factions now start off with faction_creation_cost in money
 -added factionBalance command
 -added influence tag to Faction class
 -added factionInfluence command
@@ -185,3 +185,32 @@ o ModifyClaim.java
 0.1.11.5
 - moved all dynmap stuff to seperate plugin
 - split the setPrefix command up into two commands: changecolour and changefactionname
+- added command to set warp factiontax
+- added command to set warp rank requirement
+
+Verklaring van de nieuwe lay-out voor de changelog:
+[release].[major feature opdate].[minor feature update]:[compile try]
+
+0.1.11.5:2
+o ClaimChunk: werkt de helft vd tijd niet
+    - dynmap event wordt pas aan het einde van de code gegooit
+    - stomme langzame dubbele forloop even gecomment, die gaat naar de dynmap plugin
+0.1.11.5:3
+o AsyncFQCChangeEvent: is niet async, dit fuckt met de code
+    - moest de super() functie gebruiken om de parent constructor te gebruiken
+0.1.11.5:4
+o FactionIOStuff: soms krijg je void uit de calcFQCName functie, wat weird is
+o PlayerMove: als je FQC wisselt krijg je geen pop up
+-> fout: ik lees FQC data uit een FQC die niet meer bestaat!
+    - lees eerst data, verwijder dan de FQC!
+
+0.1.11.6
+- removed all dynmap related things    
+- fixed event bs
+- added new event: modifywarp event
+
+0.1.11.6:2
+- beacon effects now only apply to faction that owns the beacon
+
+1.1.12
+- added loan system

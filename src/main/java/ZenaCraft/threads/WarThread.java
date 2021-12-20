@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class WarThread {
     //Does the counting
     private class TikTok extends TimerTask{
         private War war;
+        private DecimalFormat df = new DecimalFormat("00");
 
         public TikTok(War wwar){
             war = wwar;
@@ -59,7 +61,7 @@ public class WarThread {
             if (war.getWarScore() > 0.999 || war.getWarScore() < 0.001) endwar(this);
             war.setAge(war.getAge() + 1);
             int remainsec = war.getDeathTime() - war.getAge();
-            String remainingTime = String.valueOf(remainsec/3600) + ":" + String.valueOf((remainsec/60)%60) + ":" +String.valueOf(remainsec%60);
+            String remainingTime = df.format(remainsec/3600) + ":" + df.format((remainsec/60)%60) + ":" + df.format(remainsec%60);
             war.setRemainingTimeString(remainingTime);          
         }
 

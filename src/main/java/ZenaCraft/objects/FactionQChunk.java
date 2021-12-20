@@ -71,7 +71,7 @@ public class FactionQChunk implements Serializable{
     private synchronized void getFQChunkData(String name, double[] pos){
         String fileLoc = new String(App.FQChunk_db);
 
-        fileLoc = qString + "/" + name + ".ser";
+        fileLoc += qString + "/" + name + ".ser";
 
         File fQFile = new File(fileLoc);
 

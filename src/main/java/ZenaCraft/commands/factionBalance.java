@@ -1,5 +1,7 @@
 package ZenaCraft.commands;
 
+import java.text.DecimalFormat;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,7 +24,8 @@ public class factionBalance implements CommandExecutor {
         if (args.length != 0) return App.invalidSyntax(player);
 
         Faction faction = App.factionIOstuff.getPlayerFaction(player);
-        String balance = String.valueOf(faction.getBalance());
+        DecimalFormat df = new DecimalFormat("0.00");
+        String balance = df.format(faction.getBalance());
         player.sendMessage(App.zenfac + faction.getPrefix() +  ChatColor.WHITE + " has:" + ChatColor.GREEN + "Ƒ" + balance);
         return true;
     }

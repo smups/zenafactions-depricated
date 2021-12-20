@@ -98,6 +98,7 @@ public class ChangeColour implements CommandExecutor{
         }
 
         App.factionIOstuff.reloadScoreBoard(null);
+        player.sendMessage(App.zenfac + "Changed colour! New prefix: " + faction.getPrefix());
         return true;
     }    
 }

@@ -105,6 +105,13 @@ public class PlayerMove implements Listener{
 
         public void run(){
             player.sendMessage(App.zenfac + ChatColor.WHITE + "loading new FQC...");
+
+            //voordat we de chunk verwijderen hebben we nog wat data nodig...
+            //dit is voor de titel sending shit
+            Chunk oldChunk = oldLocation.getChunk();
+            String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
+            byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
+
             try{
                 //Wacht totdat de **verwijder** thread klaar is
                 App.factionIOstuff.unLoadFQC(player, oldLocation).join();
@@ -133,16 +140,13 @@ public class PlayerMove implements Listener{
                 Te lui om dit te fixen tho.
             */
 
-            //Deze code doet niks anders dan fucking titels sturen
-            Chunk newChunk = newLocation.getChunk();
-            Chunk oldChunk = oldLocation.getChunk();
-
-            String oldFQCName = App.factionIOstuff.calcFQCName(oldChunk.getX(), oldChunk.getZ(), null, null);
-            String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);
-
-            byte oldOwnerID = App.factionIOstuff.getFQC(oldFQCName).getChunkData()[Math.abs(oldChunk.getX()) % 100][Math.abs(oldChunk.getZ()) % 100];
+            //Dit is de titel data van de nieuwe chunk
+            Chunk newChunk = newLocation.getChunk();           
+            String newFQCName = App.factionIOstuff.calcFQCName(newChunk.getX(), newChunk.getZ(), null, null);            
             byte newOwnerID = App.factionIOstuff.getFQC(newFQCName).getChunkData()[Math.abs(newChunk.getX()) % 100][Math.abs(newChunk.getZ()) % 100];
 
+
+            //vergelijken en update sturen!
             if (oldOwnerID != newOwnerID){
                 if (newOwnerID == -1) player.sendTitle("Entering Wilderness", "Claimable territory", 10, 35, 20);
                 else player.sendTitle("Entering: " + App.factionIOstuff.getFaction(newOwnerID).getPrefix(), "", 10, 35, 20);

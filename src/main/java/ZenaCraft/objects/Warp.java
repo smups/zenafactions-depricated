@@ -38,6 +38,17 @@ public class Warp implements Serializable{
         Z = loc.getZ();
         wUuid = loc.getWorld().getUID();
     }
+    // copy constructor
+    public Warp(Warp that){
+        this.name = that.name;
+        this.loc = that.loc;
+        this.X = that.X;
+        this.Y = that.Y;
+        this.Z = that.Z;
+        this.wUuid = that.wUuid;
+        this.factionTax = that.factionTax;
+        this.rankReq = that.rankReq;
+    }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
         //first do the deserelisation
@@ -109,7 +120,7 @@ public class Warp implements Serializable{
         double warpcost;
         if (p.getWorld().equals(loc.getWorld())) warpcost = wc*p.getLocation().distance(loc)*(1 + factionTax);
         else warpcost = wc*p.getLocation().distance(new Location(p.getWorld(), 0, 100, 0))*(1 + factionTax) + 
-            wc*loc.distance(new Location(p.getWorld(), 0, 100, 0))*(1 + factionTax);
+            wc*loc.distance(new Location(loc.getWorld(), 0, 100, 0))*(1 + factionTax);
         return warpcost;
     }
 
@@ -117,16 +128,22 @@ public class Warp implements Serializable{
     public String getName(){
         return this.name;
     }
+    public UUID getID(){
+        return this.wUuid;
+    }
     public Location getLocation(){
         return this.loc;
     }
-    public double getWarpCost(){
+    public double getFactionTax(){
         return factionTax;
     }
-    public void setWarpCost(double warpcost){
-        this.factionTax = warpcost;
+    public void setFactionTax(double factionTax){
+        this.factionTax = factionTax;
     }
     public int getRankReq(){
         return this.rankReq;
+    }
+    public void setRankReq(int rank){
+        this.rankReq = rank;
     }
 }

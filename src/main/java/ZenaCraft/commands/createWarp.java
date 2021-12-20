@@ -34,7 +34,7 @@ public class createWarp implements CommandExecutor{
         double warpScale = App.getPlugin(App.class).getConfig().getDouble("warpScale");
         createCost = createCost*Math.pow(faction.getWarpList().size(), warpScale);
 
-        if ((faction.getBalance() < createCost) && (faction.getID() != -1)){
+        if ((faction.getBalance() < createCost) && (faction.getID() != 0)){
             player.sendMessage(App.zenfac + ChatColor.RED + "Your faction doesn't have enough money to create a warp!");
             return true;
         }
@@ -52,7 +52,7 @@ public class createWarp implements CommandExecutor{
             return true;
         }
 
-        faction.removeBalance(createCost);
+        if (faction.getID() !=0 ) faction.removeBalance(createCost);
         faction.addWarp(player.getLocation(), args[0]);
         player.sendMessage(App.zenfac + ChatColor.GREEN + "Warp created!");
         player.setMetadata("createWarp", new FixedMetadataValue(App.getPlugin(App.class), false));

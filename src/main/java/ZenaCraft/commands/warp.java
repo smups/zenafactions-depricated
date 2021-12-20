@@ -30,6 +30,15 @@ public class warp implements CommandExecutor{
             }
         }
 
+        Faction df = App.factionIOstuff.getFaction(0);
+
+        for(Warp w : df.getWarpList()){
+            if(w.getName().equals(args[0])){
+                df.getWarp(args[0]).warpPlayer(player);
+                return true;
+            }
+        }
+
         player.sendMessage(App.zenfac + ChatColor.RED + "No such warp exists!");
         return true;
     }

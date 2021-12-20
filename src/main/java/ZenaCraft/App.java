@@ -6,11 +6,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.dynmap.DynmapAPI;
-import org.dynmap.markers.MarkerSet;
 
 import ZenaCraft.commands.*;
 import ZenaCraft.listeners.*;
+import ZenaCraft.objects.Faction;
 import ZenaCraft.threads.*;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -36,9 +35,6 @@ public final class App extends JavaPlugin
     private static Economy econ = null;
     private static Permission perms = null;
     private static Chat chat = null;
-
-    private static DynmapAPI dapi = null;
-    private static MarkerSet markerSet = null;
 
     String default_fname = getConfig().getString("default faction name");
 
@@ -82,6 +78,7 @@ public final class App extends JavaPlugin
         //pm.registerEvents(new PlayerDamage(), this); pvp damage, very annyoing
         pm.registerEvents(new PlayerTeleport(), this);
         pm.registerEvents(new Respawn(), this);
+        if (getConfig().getBoolean("bindBeaconToFaction")) pm.registerEvents(new BeaconEffect(), this);
 
         //Commands
         getCommand("listFactions").setExecutor(new listFactions());
@@ -108,13 +105,11 @@ public final class App extends JavaPlugin
         getCommand("listwarps").setExecutor(new ListWarps());
         getCommand("changefactioncolour").setExecutor(new ChangeColour());
         getCommand("changefactionname").setExecutor(new ChangeFactionName());
-
-        //Hook into Dynmap
-        if (!setupMap()){
-            getLogger().severe("Plugin disabled, no dynmap dependency found!");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
+        getCommand("setwarptax").setExecutor(new SetWarpTax());
+        getCommand("setwarprank").setExecutor(new SetWarpRequirement());
+        getCommand("createloan").setExecutor(new CreateLoan());
+        getCommand("listloans").setExecutor(new ListLoans());
+        getCommand("takeloan").setExecutor(new TakeLoan());
 
         //all the way at the end we setup the war database
         warThread = new WarThread(war_db);
@@ -179,36 +174,21 @@ public final class App extends JavaPlugin
         return chat;
     }
 
-    private boolean setupMap(){
-        //no dynmap installed
-        if (Bukkit.getPluginManager().getPlugin("dynmap") == null) return false;
-        dapi = (DynmapAPI) Bukkit.getPluginManager().getPlugin("dynmap");
-        if (dapi.getMarkerAPI().getMarkerSet("ZenaFactions.Factions.Territory") == null){
-            markerSet = dapi.getMarkerAPI().createMarkerSet("ZenaFactions.Factions.Territory", "ZenaFactions", null, true);
-        }
-        else{
-            markerSet = dapi.getMarkerAPI().getMarkerSet("ZenaFactions.Factions.Territory");
-        }
-        return true;
-    }
-
     private boolean setupGP(){
         //no GP installed
         if (Bukkit.getPluginManager().getPlugin("GriefPrevention") == null) return false;
         return true;
     }
 
-    public static DynmapAPI getDynmapAPI(){
-        return dapi;
-    }
-
-    public static MarkerSet getMarkerSet(){
-        return markerSet;
-    }
-
-    //public functions
+    //Messages
     public static boolean invalidSyntax(Player player){
         player.sendMessage(zenfac + ChatColor.RED + "Invalid Syntax! Use /help zenafactions for help");
+        return true;
+    }
+    public static boolean invalidRank(Player player, int rankReq){
+        Faction f = factionIOstuff.getPlayerFaction(player);
+        player.sendMessage(zenfac + ChatColor.RED + "You don't have the appropriate rank to do this!" +
+            " You have to be at least: " + f.getColour().asString() + f.getRanks()[rankReq]);
         return true;
     }
 }

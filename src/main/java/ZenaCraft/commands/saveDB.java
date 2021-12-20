@@ -15,7 +15,7 @@ public class saveDB implements CommandExecutor{
         if (sender instanceof Player){
             Player player = (Player) sender;
             if (!player.isOp()){
-                player.sendMessage(App.zenfac + ChatColor.DARK_RED + "You are not permitted to use this command");
+                player.sendMessage(App.zenfac + ChatColor.RED + "You are not permitted to use this command");
                 return true;
             }
         }

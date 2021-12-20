@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.11.5
+version: 0.1.12
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -73,3 +73,18 @@ commands:
   changefactionname:
     description: changes name of your faction.
     usage: /<command> [name]
+  setwarptax:
+    description: changes the tax (in %) that your faction collects over the cost of the specified warp.
+    usage: /<command> [warp name] [tax in %]
+  setwarprank:
+    description: changes the minimum rank required to use this warp.
+    usage: /<command> [warp name] [rank name]
+  createloan:
+    description: creates a loan. Everyone may accept this loan, not just members of your faction!
+    usage: /<command> [amount to loan]
+  listloans:
+    description: lists avaliable loans
+    usage: </command>
+  takeloan:
+    description: takes out loan from a faction. Be sure to pay it back!
+    usage: </command> [faction] [loan number]

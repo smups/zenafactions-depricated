@@ -27,7 +27,6 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
-import org.dynmap.markers.AreaMarker;
 
 import ZenaCraft.App;
 import ZenaCraft.events.AsyncFQCChangeEvent;
@@ -362,31 +361,13 @@ public class FactionIOstuff {
                     //update scoreboard
                     reloadScoreBoard(null);
 
+                    if (player != null) player.sendMessage(zenfac + "Chunk Claimed!");
+                    
                     //throw event for dynmap add-on
                     for (FactionQChunk changed : mFQCs){
                         AsyncFQCChangeEvent e = new AsyncFQCChangeEvent(changed, playerFaction);
                         e.callEvent();
                     }
-
-                    double[] markerX = new double[] {chunkX*16, chunkX*16 + 16};
-                    double[] markerZ = new double[] {chunkZ*16, chunkZ*16 + 16};
-
-                    //this is ridiculously slow, I hate it!
-                    if (f == null){
-                        for (AreaMarker a : App.getMarkerSet().getAreaMarkers()){
-                            if (a.getCornerX(0) == markerX[0] && a.getCornerX(1) == markerX[1]){
-                                if (a.getCornerZ(0) == markerX[0] && a.getCornerZ(1) == markerX[1]) a.deleteMarker();
-                            }
-                        }
-                    }
-
-                    //now do the dynmap thingies
-                    int color = playerFaction.getColour().asHex();
-                    AreaMarker marker = App.getMarkerSet().createAreaMarker(String.valueOf(chunkX) + String.valueOf(chunkZ), getPlayerFaction(player).getName(), true, player.getWorld().getName(), markerX, markerZ, true);
-                    marker.setFillStyle(0.1, color);
-                    marker.setLineStyle(1, 0.2, color);
-
-                    if (player != null) player.sendMessage(zenfac + "Chunk Claimed!");                    
                 }
             }
         }

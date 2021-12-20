@@ -58,9 +58,12 @@ public class createFaction implements CommandExecutor{
 
         String[] defaultRanks = {"Founder", "Bigshot", "Member"};
         Colour c = new Colour(0xFFFFFF, org.bukkit.ChatColor.WHITE);
-        int newID = (int) App.factionIOstuff.getFactionList().size();
 
-        while (App.factionIOstuff.getFactionList().containsKey(newID)) newID++;
+        int newID = 0;
+        while (newID < 127){
+            if (!App.factionIOstuff.getFactionList().containsKey(newID)) break;
+            newID++;
+        }
 
         Faction newFaction = new Faction(name, defaultRanks, faction_cost, new HashMap<UUID, Integer>(), newID, c);
 
