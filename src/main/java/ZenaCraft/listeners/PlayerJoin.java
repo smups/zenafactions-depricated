@@ -21,40 +21,23 @@ public class PlayerJoin implements Listener{
     void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
         Plugin plugin = App.getPlugin(App.class);
-        
-        //Check of player faction metadata heeft
-        if (!player.hasMetadata("factionID")){
 
-            //Check if player has _ever_ played on the server
-            //If not, add them to the default faction
-            if (!App.factionIOstuff.isKnownPlayer(player)){
+        if (!App.factionIOstuff.isKnownPlayer(player)){
+            //Add player to default faction with lowest rank
+            //and give him some metadata
+            Faction defaultFaction = App.factionIOstuff.getFaction(0);
+            int rank = 2;
+            if (player.isOp()) rank = 0;
+            App.factionIOstuff.addPlayerToFaction(defaultFaction, player, rank);
 
-                //Add player to default faction with lowest rank
-                //and give him some metadata
-                Faction defaultFaction = App.factionIOstuff.getFaction(0);
-                int rank = 2;
-                if (player.isOp()) rank = 0;
-                App.factionIOstuff.addPlayerToFaction(defaultFaction, player, rank);
-                player.setMetadata("faction", new FixedMetadataValue(plugin, defaultFaction.getName()));
-                player.setMetadata("factionID", new FixedMetadataValue(plugin, defaultFaction.getID()));   
-                
-                event.getPlayer().sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the international faction!");
-
-            }
-            else{
-                //Now for the returning player
-                Faction faction = App.factionIOstuff.getPlayerFaction(player);
-            
-                player.setMetadata("faction", new FixedMetadataValue(plugin, faction.getName()));
-                player.setMetadata("factionID", new FixedMetadataValue(plugin, faction.getID()));                
-                event.setJoinMessage(App.zenfac + ChatColor.WHITE + "(" + faction.getPrefix() + ChatColor.WHITE + ") " +
-                    "Welcome back " + ChatColor.BOLD + player.getDisplayName());
-            }
+            event.getPlayer().sendMessage(App.zenfac + ChatColor.GREEN + "You've been added to the international faction!");
         }
         else{
-            String faction = player.getMetadata("faction").get(0).asString();
-            event.setJoinMessage(App.zenfac + ChatColor.WHITE + "(" + faction + ChatColor.WHITE + ") " +
-            "Welcome back " + ChatColor.BOLD + player.getDisplayName());
+            //Now for the returning player
+            Faction faction = App.factionIOstuff.getPlayerFaction(player);
+                    
+            event.setJoinMessage(App.zenfac + ChatColor.WHITE + "(" + faction.getPrefix() + ChatColor.WHITE + ") " +
+                "Welcome back " + ChatColor.BOLD + player.getDisplayName());
         }
 
         //Here comes the Scoreboard stuff

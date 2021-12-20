@@ -176,3 +176,12 @@ o ModifyClaim.java
 0.1.11.3
 - finished warps (for now)
 - more bugfixes
+
+0.1.11.4
+- removed as much of the faction playerMetadata as possible (may add again in future but was causing bugs)
+- fixed broken if statement in setranknames
+- eliminated all uses of faction and factionID metadata
+
+0.1.11.5
+- moved all dynmap stuff to seperate plugin
+- split the setPrefix command up into two commands: changecolour and changefactionname

@@ -18,18 +18,24 @@ import ZenaCraft.App;
 public class FactionQChunk implements Serializable{
     static final long serialVersionUID = 100L;
 
+    //persistent fields
     final String name;
     final double[] pos;
     final UUID uuid;
+    private byte[][] chunkData = new byte[100][100];
+    private String qString;
 
-    HashMap<UUID,Integer> onlinePlayers = new HashMap<UUID,Integer>();    
-    byte[][] chunkData = new byte[100][100];
+    //transient fields
+    transient HashMap<UUID,Integer> onlinePlayers = new HashMap<UUID,Integer>();   
 
     public FactionQChunk(String newName, Player player, double[] newPos){
         name = newName;
         onlinePlayers.put(player.getUniqueId(), 0); //player : rank
         pos = new double[] {newPos[0], newPos[1]};
+
+        calcQString(); //this *has* to happen before getFQChunkdata!!!!
         getFQChunkData(newName, newPos);
+
         uuid = UUID.randomUUID();
     }
 
@@ -47,15 +53,25 @@ public class FactionQChunk implements Serializable{
         return uuid.hashCode();
     }
 
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+        //do the deserilasation
+        in.defaultReadObject();
+
+        //handle stupid cases
+        if (qString == null) calcQString();
+    }
+
+    private void calcQString(){
+        if (pos[0] > 0 && pos[1] > 0) qString = "Q1";
+        if (pos[0] < 0 && pos[1] > 0) qString = "Q2";
+        if (pos[0] < 0 && pos[1] < 0) qString = "Q3";
+        if (pos[0] > 0 && pos[1] < 0) qString = "Q4";
+    }
+
     private synchronized void getFQChunkData(String name, double[] pos){
         String fileLoc = new String(App.FQChunk_db);
-        if (pos[0] > 0 && pos[1] > 0) fileLoc += "Q1/";
-        if (pos[0] < 0 && pos[1] > 0) fileLoc += "Q2/";
-        if (pos[0] < 0 && pos[1] < 0) fileLoc += "Q3/";
-        if (pos[0] > 0 && pos[1] < 0) fileLoc += "Q4/";
 
-        fileLoc += name;
-        fileLoc += ".ser";
+        fileLoc = qString + "/" + name + ".ser";
 
         File fQFile = new File(fileLoc);
 
@@ -137,5 +153,12 @@ public class FactionQChunk implements Serializable{
     }
     public synchronized void setChunkData(byte[][] newChunkData){
         this.chunkData = newChunkData;
+    }
+    public byte[] getSign(){
+        if (qString.equals("Q1")) return new byte[] {1,1};
+        if (qString.equals("Q2")) return new byte[] {-1,1};
+        if (qString.equals("Q3")) return new byte[] {-1,-1};
+        if (qString.equals("Q4")) return new byte[] {1,-1};
+        return null;
     }
 }

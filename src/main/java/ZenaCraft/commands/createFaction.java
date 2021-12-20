@@ -12,6 +12,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import ZenaCraft.App;
+import ZenaCraft.objects.Colour;
 import ZenaCraft.objects.Faction;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.economy.Economy;
@@ -56,12 +57,12 @@ public class createFaction implements CommandExecutor{
         }
 
         String[] defaultRanks = {"Founder", "Bigshot", "Member"};
-        String prefix = new String(name);
+        Colour c = new Colour(0xFFFFFF, org.bukkit.ChatColor.WHITE);
         int newID = (int) App.factionIOstuff.getFactionList().size();
 
         while (App.factionIOstuff.getFactionList().containsKey(newID)) newID++;
 
-        Faction newFaction = new Faction(name, defaultRanks, faction_cost, new HashMap<UUID, Integer>(), prefix, newID, 0xFFFFFF);
+        Faction newFaction = new Faction(name, defaultRanks, faction_cost, new HashMap<UUID, Integer>(), newID, c);
 
         App.factionIOstuff.addFaction(newFaction);
 

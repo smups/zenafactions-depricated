@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,6 +30,8 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.dynmap.markers.AreaMarker;
 
 import ZenaCraft.App;
+import ZenaCraft.events.AsyncFQCChangeEvent;
+import ZenaCraft.objects.Colour;
 import ZenaCraft.objects.Faction;
 import ZenaCraft.objects.FactionQChunk;
 
@@ -85,7 +89,7 @@ public class FactionIOstuff {
         return this.playerHashMap;
     }
     public void addKnownPlayer(Player player){
-        int playerFactionID = player.getMetadata("factionID").get(0).asInt();
+        int playerFactionID = getPlayerFaction(player).getID();
         playerHashMap.put(player.getUniqueId(), playerFactionID);
     }
     public void removeKnownPlayer(Player player){
@@ -296,14 +300,17 @@ public class FactionIOstuff {
 
             if (f == null){
                 if (player == null) return;
-                playerFaction = factionHashMap.get((int) (player.getMetadata("factionID").get(0).asByte()));
+                playerFaction = getPlayerFaction(player);
 
-                if (playerFaction.getMembers().get(player.getUniqueId())> 1){
+                if (playerFaction.getPlayerRank(player) > 1){
                     player.sendMessage(zenfac + ChatColor.RED + "You don't have to appropriate rank to do this! You have to be at least: " + ChatColor.GREEN + playerFaction.getRanks()[1]);
                     return;
                 }
             }
             else playerFaction = f;
+
+            //Deze lijst houdt bij welke FQC's we aangepast hebben!
+            List<FactionQChunk> mFQCs = new ArrayList<FactionQChunk>();
 
             for (int i = -1*radius; i <= radius; i++){
                 for (int j = -1*radius; j<= radius; j++){
@@ -314,9 +321,14 @@ public class FactionIOstuff {
                     if (i*i + j*j >= radius*radius) continue;
                     chunkX += i;
                     chunkZ += j;
+
                     String FQCName = calcFQCName(chunkX, chunkZ, null, null);
-                    Bukkit.getLogger().info("Chunk [" + String.valueOf(chunkX) + "," + String.valueOf(chunkZ) + "] in claimed in FQC: " + FQCName + "@[" + String.valueOf(Math.abs(chunkX % 100)) + "," + String.valueOf(Math.abs(chunkZ % 100)) + "]");
-                    byte[][] chunkData = getFQC(FQCName).getChunkData();
+                    FactionQChunk fqc = getFQC(FQCName);
+
+                    Bukkit.getLogger().info("Chunk [" + String.valueOf(chunkX) + "," + String.valueOf(chunkZ) + "] in claimed in FQC: " +
+                        FQCName + "@[" + String.valueOf(Math.abs(chunkX % 100)) + "," + String.valueOf(Math.abs(chunkZ % 100)) + "]");
+
+                    byte[][] chunkData = fqc.getChunkData();
                     int ownerID = chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)];
 
                     //Check if the chunk is avaliable
@@ -344,8 +356,17 @@ public class FactionIOstuff {
                     //this line does the actual claiming
                     chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)] = (byte) playerFaction.getID();
 
+                    //record that we've changed a FQC
+                    if (!mFQCs.contains(fqc)) mFQCs.add(fqc);
+
                     //update scoreboard
                     reloadScoreBoard(null);
+
+                    //throw event for dynmap add-on
+                    for (FactionQChunk changed : mFQCs){
+                        AsyncFQCChangeEvent e = new AsyncFQCChangeEvent(changed, playerFaction);
+                        e.callEvent();
+                    }
 
                     double[] markerX = new double[] {chunkX*16, chunkX*16 + 16};
                     double[] markerZ = new double[] {chunkZ*16, chunkZ*16 + 16};
@@ -360,8 +381,8 @@ public class FactionIOstuff {
                     }
 
                     //now do the dynmap thingies
-                    int color = playerFaction.getColor();
-                    AreaMarker marker = App.getMarkerSet().createAreaMarker(String.valueOf(chunkX) + String.valueOf(chunkZ), player.getMetadata("faction").get(0).asString(), true, player.getWorld().getName(), markerX, markerZ, true);
+                    int color = playerFaction.getColour().asHex();
+                    AreaMarker marker = App.getMarkerSet().createAreaMarker(String.valueOf(chunkX) + String.valueOf(chunkZ), getPlayerFaction(player).getName(), true, player.getWorld().getName(), markerX, markerZ, true);
                     marker.setFillStyle(0.1, color);
                     marker.setLineStyle(1, 0.2, color);
 
@@ -593,8 +614,10 @@ public class FactionIOstuff {
     
                     HashMap<UUID, Integer> dummyHashMap = new HashMap<UUID, Integer>();
                     String[] defaultRanks = {"Admin", "Staff", "New Player"};
-                    Faction defaultFaction = new Faction(default_fname, defaultRanks, 0.0, dummyHashMap, ChatColor.AQUA + default_fname, 0, 0x55FFFF);
-
+                    Colour defaultColour = new Colour(0x55FFFF, ChatColor.AQUA);
+                    Faction defaultFaction = new Faction(default_fname, defaultRanks, 0.0, 
+                        dummyHashMap, 0, defaultColour);
+                        
                     factionHashMap.put(0, defaultFaction);
     
                     out.writeObject(factionHashMap);

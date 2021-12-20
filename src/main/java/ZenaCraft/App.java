@@ -89,7 +89,7 @@ public final class App extends JavaPlugin
         getCommand("saveDB").setExecutor(new saveDB());
         getCommand("factionBalance").setExecutor(new factionBalance());
         getCommand("factionInfluence").setExecutor(new factionInfluence());
-        getCommand("setPrefix").setExecutor(new setPrefix());
+        //getCommand("setPrefix").setExecutor(new setPrefix()); -- depricated
         getCommand("listLoadedFQChunks").setExecutor(new ListLoadedFQCs());
         getCommand("claimChunk").setExecutor(new claimChunk());
         getCommand("toggleAutoClaim").setExecutor(new toggleAutoClaim());
@@ -105,6 +105,9 @@ public final class App extends JavaPlugin
         getCommand("addtowarzone").setExecutor(new AddToWarZone());
         getCommand("createWarp").setExecutor(new createWarp());
         getCommand("warp").setExecutor(new warp());
+        getCommand("listwarps").setExecutor(new ListWarps());
+        getCommand("changefactioncolour").setExecutor(new ChangeColour());
+        getCommand("changefactionname").setExecutor(new ChangeFactionName());
 
         //Hook into Dynmap
         if (!setupMap()){

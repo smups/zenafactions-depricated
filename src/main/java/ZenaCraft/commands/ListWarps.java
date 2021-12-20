@@ -36,6 +36,24 @@ public class ListWarps implements CommandExecutor{
 
         DecimalFormat df = new DecimalFormat("0.00");
 
+        response += ChatColor.BOLD + "[" + faction.getPrefix() + "] " + ChatColor.RESET;
+        for(Warp w : wList){
+            if (w.getRankReq() < rank) continue;
+            response += w.getName() + ChatColor.WHITE + "(" + ChatColor.GOLD + "Ƒ";
+            response += df.format(w.calcWarpCost(player)) + ChatColor.WHITE + "), " + ChatColor.AQUA;
+        }
+
+        //now add the default warps anyone can access!
+        Faction defaulFaction = App.factionIOstuff.getFaction(0);
+
+        if (defaulFaction.equals(faction)){
+            player.sendMessage(response);
+            return true;
+        }
+
+        response += ChatColor.BOLD + "[" + defaulFaction.getPrefix() + "] " + ChatColor.RESET;
+        wList = defaulFaction.getWarpList();
+        
         for(Warp w : wList){
             if (w.getRankReq() < rank) continue;
             response += w.getName() + ChatColor.WHITE + "(" + ChatColor.GOLD + "Ƒ";

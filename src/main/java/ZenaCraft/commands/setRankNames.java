@@ -27,8 +27,8 @@ public class setRankNames implements CommandExecutor{
         String[] newRanks = faction.getRanks();
 
         if (args.length > 0) newRanks[0] = args[0];
-        else if (args.length > 1) newRanks[1] = args[1];
-        else if (args.length > 2) newRanks[2] = args[2];
+        if (args.length > 1) newRanks[1] = args[1];
+        if (args.length > 2) newRanks[2] = args[2];
         else return App.invalidSyntax(player);
 
         faction.setRanks(newRanks);

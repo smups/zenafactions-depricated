@@ -27,7 +27,7 @@ public class ModifyClaim implements Listener{
             byte[][] chunkData = App.factionIOstuff.getFQC(FQCName).getChunkData();
             int ownerID = chunkData[Math.abs(chunkX % 100)][Math.abs(chunkZ % 100)];
             if (ownerID == -1) continue;
-            byte playerFaction = player.getMetadata("factionID").get(0).asByte();
+            byte playerFaction = (byte) App.factionIOstuff.getPlayerFaction(player).getID();
             if (ownerID != playerFaction) condition += 1;
         }
 

@@ -44,33 +44,37 @@ public class declarewar implements CommandExecutor{
             return true;
         }
 
-        //check if they're trying to boop you by warring their own faction
-        if (App.factionIOstuff.getFaction(p.getMetadata("factionID").get(0).asInt()).getName().equals(args[0])){
-            p.sendMessage(App.zenfac + ChatColor.RED + "Can't declare war on yourself!");
-            return true;
-        }
-
         if (App.warThread.getWarFromFaction(attackers) != null){
             p.sendMessage(App.zenfac + ChatColor.RED + "you are already at war with someone!");
             return true;
         }
 
+        //get defending faction
+        Faction defenders = null;;
         for (Map.Entry mEntry : App.factionIOstuff.getFactionList().entrySet()){
-            Faction defenders = (Faction) mEntry.getValue();
-
-            if (App.warThread.getWarFromFaction(defenders) != null){
-                p.sendMessage(App.zenfac + ChatColor.RED + "sorry, this faction is already at war with someone else!");
-                return true;
-            }
-
-            if (defenders.getName().equals(args[0])){
-                App.warThread.startWar(defenders, attackers, p.getChunk());
-                attackers.setInfluence(attackers.getInfluence() - warcost);
-                App.factionIOstuff.reloadScoreBoard(null);
-                return true;
-            }
+            Faction mf = (Faction) mEntry.getValue();
+            if (mf.getName().equals(args[0])) defenders = mf;
         }
-        p.sendMessage(App.zenfac + ChatColor.RED + "Faction " + args[0] + " not found!");
+
+        if (defenders == null){
+            p.sendMessage(App.zenfac + ChatColor.RED + "Faction " + args[0] + " not found!");
+            return true;
+        }
+
+        if (App.warThread.getWarFromFaction(defenders) != null){
+            p.sendMessage(App.zenfac + ChatColor.RED + "sorry, this faction is already at war with someone else!");
+            return true;
+        }
+
+        //check if they're trying to boop you by warring their own faction
+        if (attackers.equals(defenders)){
+            p.sendMessage(App.zenfac + ChatColor.RED + "Can't declare war on yourself!");
+            return true;
+        }
+
+        App.warThread.startWar(defenders, attackers, p.getChunk());
+        attackers.setInfluence(attackers.getInfluence() - warcost);
+        App.factionIOstuff.reloadScoreBoard(null);
         return true;
     }    
 }

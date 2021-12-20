@@ -108,7 +108,8 @@ public class Warp implements Serializable{
         double wc = App.getPlugin(App.class).getConfig().getDouble("warpCost");
         double warpcost;
         if (p.getWorld().equals(loc.getWorld())) warpcost = wc*p.getLocation().distance(loc)*(1 + factionTax);
-        else warpcost = wc*p.getLocation().distance(new Location(p.getWorld(), 0, 100, 0))*(1 + factionTax);
+        else warpcost = wc*p.getLocation().distance(new Location(p.getWorld(), 0, 100, 0))*(1 + factionTax) + 
+            wc*loc.distance(new Location(p.getWorld(), 0, 100, 0))*(1 + factionTax);
         return warpcost;
     }
 

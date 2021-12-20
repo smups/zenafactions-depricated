@@ -1,6 +1,6 @@
 main: ZenaCraft.App
 name: ZenaFactions
-version: 0.1.11.3
+version: 0.1.11.5
 api-version: 1.16
 depend: ["Vault", "dynmap", "GriefPrevention"]
 commands:
@@ -19,9 +19,6 @@ commands:
   factionInfluence:
     description: returns faction influence
     usage: </command>
-  setPrefix:
-    description: changes prefix and color. Allowed colors are red, orange, purple, blue, and green
-    usage: /<command> [prefix] [color]
   listLoadedFQChunks:
     description: lists loaded FQC's
     usage: /<command>
@@ -67,3 +64,12 @@ commands:
   warp:
     description: warps you to your destination
     usage: /<command> [warp name]
+  listwarps:
+    description:  lists avaliable warps
+    usage: /<command>
+  changefactioncolour:
+    description: changes colour of your faction. All default mc colour names are allowed.
+    usage: /<command> [colour]
+  changefactionname:
+    description: changes name of your faction.
+    usage: /<command> [name]

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -23,19 +24,20 @@ public class Faction implements Serializable{
     private double influence;
     private HashMap<UUID,Integer> members;
     private String prefix;
-    private int color;
+    private Colour colour;
     private HashMap<String,Warp> warps;
 
-    public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, String Prefix, int newID, int newColor){
+    public Faction(String Name, String[] Ranks, Double Balance, HashMap<UUID,Integer> Members, int newID, Colour newColor){
         name = Name;
         ranks = Ranks;
         balance = Balance;
         members = Members;
-        prefix = Prefix;
         influence = 0;
         ID = newID;
-        color = newColor;
+        colour = newColor;
+
         warps = new HashMap<String,Warp>();
+        updatePrefix();
     }
 
     /*
@@ -65,11 +67,20 @@ public class Faction implements Serializable{
 
         //now for the special things
         if (warps == null) warps = new HashMap<String,Warp>();
+        if (colour == null) colour = new Colour(0xFFFFFF, ChatColor.WHITE);
+    }
+
+    private void updatePrefix(){
+        prefix = colour.asString() + name;
     }
 
     //getters en setters
     public String getName(){
         return name;
+    }
+    public void setName(String name){
+        this.name = name;
+        updatePrefix();
     }
     public String[] getRanks(){
         return ranks;
@@ -120,17 +131,15 @@ public class Faction implements Serializable{
     public String getPrefix(){
         return prefix;
     }
-    public void setPrefix(String newPrefix){
-        this.prefix = newPrefix;
-    }
     public int getID(){
         return ID;
     }
-    public int getColor(){
-        return color;
+    public Colour getColour(){
+        return colour;
     }
-    public void setColor(int newColor){
-        this.color = newColor;
+    public void setColour(Colour c){
+        this.colour = c;
+        updatePrefix();
     }
     //warpstuff
     public List<Warp> getWarpList(){
